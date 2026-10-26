@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ashtanga Primary Series — Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  /* Holicow design tokens (tokens.jsx, Brand Manual Mar 2026) */
+  :root{
+    --purple:#6433A0; --indigo:#1B1642; --ink900:#0A0A0F; --ink800:#2A2A33;
+    --ink700:#4A4A57; --ink600:#6B6B78; --ink500:#8A8A95; --ink300:#D4D4DB;
+    --ink200:#E8E8ED; --ink100:#F4F4F2; --bg:#FAFAF7; --card:#FFFFFF;
+    --display:'Montserrat',-apple-system,sans-serif; --body:'Open Sans',-apple-system,sans-serif;
+    --r-lg:14px; --r-xl:20px; --r-pill:999px;
+    --sh-md:0 2px 6px rgba(10,10,15,.06),0 1px 2px rgba(10,10,15,.04);
+    --sh-lg:0 8px 24px rgba(10,10,15,.08),0 2px 6px rgba(10,10,15,.04);
+    --warm:#C25E00; --cool:#2B6C8F; --neutral:#6B6B78;
+    --splash:linear-gradient(90deg,#E63946 0%,#F77F00 16%,#FFBE0B 32%,#4CB944 48%,#2EC4B6 64%,#3A86FF 82%,#7209B7 100%);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--indigo:#C9B8E8; --ink900:#EDE7DC; --ink800:#DED8CC; --ink700:#B9B1A4;
+      --ink600:#A79D8F; --ink500:#8f867a; --ink300:#3f3a33; --ink200:#33302a; --ink100:#262320;
+      --bg:#1b1917; --card:#262320; --purple:#b48aec; --warm:#E8954A; --cool:#6FB3D1;
+      --sh-md:0 2px 8px rgba(0,0,0,.35); --sh-lg:0 10px 30px rgba(0,0,0,.45);}
+  }
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{font-family:var(--body); background:var(--bg); color:var(--ink800); line-height:1.55; -webkit-font-smoothing:antialiased; padding:0 14px 60px}
+  .strip{height:3px; background:var(--splash); margin:0 -14px 16px}
+  .wrap{max-width:580px; margin:0 auto}
+  header{text-align:center; margin-bottom:6px}
+  h1{font-family:var(--display); font-weight:700; font-size:1.3rem; color:var(--indigo); margin:4px 0 2px}
+  .sub{color:var(--ink600); font-size:.82rem}
+  .controls{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:16px 0 4px}
+  select,.btn{font:inherit; font-size:.82rem; padding:8px 13px; border-radius:var(--r-pill); border:1px solid var(--ink300); background:var(--card); color:var(--ink800); cursor:pointer; font-family:var(--body)}
+  .btn:hover,select:hover{border-color:var(--purple)}
+  .btn.primary{background:var(--purple); color:#fff; border-color:var(--purple)}
+  .seg{display:inline-flex; border:1px solid var(--ink300); border-radius:var(--r-pill); overflow:hidden; background:var(--card)}
+  .seg button{border:0; background:transparent; font:inherit; font-family:var(--body); font-size:.82rem; padding:8px 13px; cursor:pointer; color:var(--ink700)}
+  .seg button.on{background:var(--purple); color:#fff}
+  .progress{height:6px; background:var(--ink200); border-radius:var(--r-pill); margin:14px 0 4px; overflow:hidden}
+  .progress>span{display:block; height:100%; background:var(--purple); width:0; transition:width .3s}
+  .plabel{text-align:center; font-size:.76rem; color:var(--ink600); margin-bottom:12px}
+  .plabel b{color:var(--purple)}
+
+  .scene{perspective:1600px}
+  .card{position:relative; width:100%; min-height:470px; cursor:pointer; transform-style:preserve-3d; transition:transform .5s cubic-bezier(.4,.2,.2,1)}
+  .card.flipped{transform:rotateY(180deg)}
+  .face{position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; background:var(--card); border:1px solid var(--ink200); border-radius:var(--r-xl); box-shadow:var(--sh-lg); padding:24px; display:flex; flex-direction:column}
+  .face::before{content:""; position:absolute; top:0; left:0; right:0; height:4px; border-radius:var(--r-xl) var(--r-xl) 0 0; background:var(--cat,var(--purple))}
+  .back{transform:rotateY(180deg)}
+  .toprow{display:flex; justify-content:space-between; align-items:center}
+  .tag{font-family:var(--display); font-weight:600; font-size:.64rem; letter-spacing:.9px; text-transform:uppercase; padding:4px 11px; border-radius:var(--r-pill); color:#fff; background:var(--cat,var(--purple))}
+  .num{color:var(--ink500); font-size:.72rem; font-family:var(--display); font-weight:500}
+  .front .center{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center}
+  .figbox{margin-bottom:10px}
+  .poseimg{width:188px; height:188px; object-fit:contain; border-radius:14px; background:#fff; border:1px solid var(--ink200); box-shadow:var(--sh-md)}
+  .poseimg.sm{width:66px; height:66px; border-radius:10px; box-shadow:none}
+  .noimg{width:170px; height:70px; display:flex; align-items:center; justify-content:center; color:var(--ink500); font-size:.76rem; font-style:italic; border:1px dashed var(--ink300); border-radius:12px}
+  .noimg.sm{width:66px; height:66px; font-size:1rem}
+  .bhead{display:flex; gap:12px; align-items:center; margin-top:10px}
+  .figbox-sm{flex:0 0 auto}
+  .prime{font-family:var(--display); font-weight:600; font-size:2rem; margin:0; line-height:1.15; color:var(--indigo)}
+  .prime.sa{font-style:italic; font-family:var(--body); font-weight:600}
+  .pron{color:var(--ink600); font-size:.92rem; margin-top:12px; font-style:italic}
+  .role-front{color:var(--ink500); font-size:.8rem; margin-top:18px; max-width:32ch}
+  .hint{text-align:center; color:var(--ink500); font-size:.72rem; margin-top:8px}
+
+  .back h2{font-family:var(--body); font-style:italic; font-weight:600; font-size:1.4rem; margin:12px 0 0; color:var(--indigo)}
+  .back .eng{color:var(--ink600); font-size:.9rem; margin:2px 0 10px}
+  .lens{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px}
+  .chip{font-size:.68rem; padding:3px 9px; border-radius:var(--r-pill); border:1px solid var(--ink300); display:inline-flex; align-items:center; gap:5px; color:var(--ink700)}
+  .chip .dot{width:8px; height:8px; border-radius:50%}
+  .rows{display:flex; flex-direction:column; gap:8px; margin-bottom:12px}
+  .row{display:flex; gap:10px; font-size:.85rem}
+  .row .k{flex:0 0 82px; color:var(--ink500); text-transform:uppercase; font-size:.63rem; letter-spacing:.6px; padding-top:3px; font-family:var(--display); font-weight:600}
+  .row .v{flex:1; color:var(--ink800)}
+  .cue{background:var(--ink100); border-left:3px solid var(--cat,var(--purple)); border-radius:8px; padding:11px 13px; font-size:.87rem; margin-top:auto}
+  .cue .k{font-family:var(--display); color:var(--cat,var(--purple)); text-transform:uppercase; font-size:.61rem; letter-spacing:.8px; font-weight:700; margin-bottom:4px}
+
+  .nav{display:flex; gap:10px; margin-top:16px}
+  .nav .btn{flex:1; font-size:.95rem; padding:13px}
+  .learn{flex:0 0 auto !important}
+  .learn.on{background:#2D7A5F; color:#fff; border-color:#2D7A5F}
+  .keys{text-align:center; font-size:.72rem; color:var(--ink500); margin-top:12px}
+  kbd{font-family:var(--display); font-size:.68rem; background:var(--ink200); padding:1px 6px; border-radius:4px; color:var(--ink700)}
+
+  .overlay{position:fixed; inset:0; background:rgba(10,10,15,.5); display:none; z-index:50; padding:16px 12px; overflow:auto}
+  .overlay.open{display:block}
+  .sheet{max-width:640px; margin:16px auto; background:var(--card); border-radius:var(--r-xl); box-shadow:var(--sh-lg); overflow:hidden}
+  .shead{background:var(--indigo); color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0}
+  .shead h2{font-family:var(--display); font-weight:700; font-size:1rem; margin:0}
+  .shead .x{background:transparent; border:0; color:#fff; font-size:1.4rem; cursor:pointer; line-height:1}
+  .sbody{padding:18px 20px}
+  .sbody h3{font-family:var(--display); font-weight:700; font-size:.8rem; letter-spacing:.4px; text-transform:uppercase; color:var(--purple); margin:20px 0 8px}
+  .sbody h3:first-child{margin-top:0}
+  .sbody p{font-size:.87rem; margin:0 0 10px}
+  .sbody ul{margin:0 0 10px; padding-left:18px} .sbody li{font-size:.87rem; margin-bottom:5px}
+  .arc{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:4px 0 12px}
+  .arc span{font-family:var(--display); font-weight:600; font-size:.64rem; padding:5px 9px; border-radius:var(--r-pill); color:#fff}
+  .arc i{color:var(--ink400); font-style:normal}
+  .maptbl{width:100%; border-collapse:collapse; font-size:.8rem; margin-bottom:10px}
+  .maptbl th,.maptbl td{text-align:left; padding:7px 8px; border-bottom:1px solid var(--ink200); vertical-align:top}
+  .maptbl th{font-family:var(--display); font-size:.64rem; letter-spacing:.4px; text-transform:uppercase; color:var(--ink500)}
+  .maptbl td b{font-family:var(--display); font-weight:600}
+  .fam{border-left:3px solid var(--fc,var(--purple)); padding:2px 0 2px 11px; margin-bottom:14px}
+  .fam h4{font-family:var(--display); font-weight:700; font-size:.82rem; margin:0 0 2px; color:var(--fc,var(--indigo))}
+  .fam .pr{font-size:.82rem; font-style:italic; color:var(--ink600); margin:0 0 6px}
+  .fam ul{margin:4px 0} .fam .guard{font-size:.8rem; color:var(--ink700)} .fam .guard b{color:var(--warm)}
+  .src{font-size:.73rem; color:var(--ink500); margin-top:14px}
+/*EXAM_CSS_START*/
+
+  /* ===== Exam Prep ===== */
+  .modebar{display:flex; justify-content:center; margin:0 0 14px}
+  .modebar .seg button{padding:9px 20px; font-weight:600}
+  .xhero{text-align:center; margin-bottom:6px}
+  .xh1{font-family:var(--display); font-weight:700; font-size:1.3rem; color:var(--indigo)}
+  .xsub{color:var(--ink600); font-size:.82rem; margin-top:2px}
+  .xdate{margin-top:8px; font-size:.78rem; color:var(--ink600)}
+  .xdate input{font:inherit; font-size:.78rem; padding:4px 8px; border:1px solid var(--ink300); border-radius:8px; background:var(--card); color:var(--ink800)}
+  .xactions{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:14px 0 10px}
+  .xsearch{width:100%; font:inherit; font-size:.88rem; padding:10px 14px; border:1px solid var(--ink300); border-radius:var(--r-pill); background:var(--card); color:var(--ink800); margin-bottom:12px}
+  .xsearch:focus{outline:2px solid var(--purple); outline-offset:1px}
+  .xsres{margin-bottom:12px}
+  .xhit{display:block; width:100%; text-align:left; font:inherit; font-size:.84rem; padding:9px 12px; margin-bottom:6px; border:1px solid var(--ink200); border-left:3px solid var(--cat,var(--purple)); border-radius:10px; background:var(--card); color:var(--ink800); cursor:pointer}
+  .xhit:hover{border-color:var(--purple)}
+  .xhit small{display:block; color:var(--ink500); font-size:.7rem; margin-bottom:2px}
+  .xtopics{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  @media (max-width:420px){.xtopics{grid-template-columns:1fr}}
+  .xtile{position:relative; text-align:left; font:inherit; padding:14px 14px 12px; background:var(--card); border:1px solid var(--ink200); border-top:4px solid var(--cat,var(--purple)); border-radius:var(--r-lg); box-shadow:var(--sh-md); cursor:pointer; color:var(--ink800)}
+  .xtile:hover{border-color:var(--purple); border-top-color:var(--cat,var(--purple))}
+  .xtn{font-family:var(--display); font-weight:600; font-size:.88rem; color:var(--indigo); margin-bottom:3px}
+  .xtm{font-size:.74rem; color:var(--ink600); margin-bottom:8px}
+  .xbarm{height:5px; border-radius:999px; background:var(--ink200); overflow:hidden}
+  .xbarm span{display:block; height:100%; background:var(--cat,var(--purple))}
+  .vtag{display:inline-block; font-family:var(--display); font-weight:600; font-size:.6rem; letter-spacing:.5px; text-transform:uppercase; padding:2px 8px; border-radius:999px; background:#FFF1D6; color:#8A5A00; border:1px solid #F0C36A; margin-top:8px}
+  .xhd .vtag{margin-top:0; margin-left:6px}
+  @media (prefers-color-scheme:dark){.vtag{background:#3b2f14; color:#F0C36A; border-color:#7a5d1c}}
+  .xfoot{margin-top:16px; font-size:.74rem; color:var(--ink500); text-align:center}
+
+  .xbar{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+  .xbar .btn{padding:7px 12px}
+  .xtitle{flex:1; font-family:var(--display); font-weight:600; font-size:.9rem; color:var(--indigo); text-align:center}
+  .xcount{font-size:.78rem; color:var(--ink500); font-family:var(--display)}
+  .xcard{position:relative; background:var(--card); border:1px solid var(--ink200); border-radius:var(--r-xl); box-shadow:var(--sh-lg); padding:22px 20px 20px; margin-top:12px}
+  .xcard::before{content:""; position:absolute; top:0; left:0; right:0; height:4px; border-radius:var(--r-xl) var(--r-xl) 0 0; background:var(--cat,var(--purple))}
+  .xhd{display:flex; align-items:center; gap:6px; margin-bottom:12px; flex-wrap:wrap}
+  .xchip{font-size:.66rem; color:var(--ink500); border:1px solid var(--ink300); border-radius:999px; padding:1px 8px}
+  .xchip.got{color:#2D7A5F; border-color:#2D7A5F}
+  .xchip.review{color:#A8322F; border-color:#A8322F}
+  .xq{font-size:1.02rem; line-height:1.5; color:var(--ink900); margin-bottom:14px; font-weight:600; font-family:var(--body)}
+  .xsub{font-size:.7rem}
+  .xlab{font-family:var(--display); font-weight:600; font-size:.64rem; letter-spacing:.6px; text-transform:uppercase; color:var(--ink500); margin-bottom:6px}
+  .xprompt{font-family:var(--display); font-weight:600; font-size:1.6rem; color:var(--indigo); margin:6px 0 16px}
+  .xbig{font-family:var(--body); font-style:italic; font-weight:600; font-size:1.4rem; color:var(--indigo)}
+  .xmine,.vta{width:100%; min-height:84px; font:inherit; font-size:.88rem; padding:10px 12px; border:1px solid var(--ink300); border-radius:10px; background:var(--card); color:var(--ink800); margin-bottom:10px; resize:vertical}
+  .xmine:focus,.vta:focus{outline:2px solid var(--purple); outline-offset:1px}
+  .xans{margin-top:14px; padding-top:14px; border-top:1px dashed var(--ink300)}
+  .hide{display:none}
+  .atxt{font-size:.9rem; line-height:1.6; color:var(--ink800)}
+  .atxt b{color:var(--indigo)}
+  .bnote{color:var(--ink600); font-style:italic}
+  .cite{color:var(--ink500); font-size:.78rem}
+  .afix{font-size:.9rem; line-height:1.6; background:#E8F6F1; border-left:3px solid #2D7A5F; border-radius:8px; padding:10px 12px; color:#1c4d3b}
+  @media (prefers-color-scheme:dark){.afix{background:#17332a; color:#bfe6d6}}
+  .draft{margin-top:8px; font-size:.82rem; color:var(--ink600)}
+  .draft summary{cursor:pointer}
+  .mynote{font-size:.86rem; background:var(--accent-soft,#efe6d4); border-radius:8px; padding:8px 12px; margin-bottom:10px}
+  .chk{margin-top:12px; border-radius:10px; padding:10px 12px; font-size:.78rem; border:1px solid var(--ink300); background:var(--ink100)}
+  .chk .chkh{font-family:var(--display); font-weight:600; font-size:.7rem; margin-bottom:4px}
+  .chk.ok{border-color:#2D7A5F; background:#EAF6F0}.chk.ok .chkh{color:#2D7A5F}
+  .chk.warn{border-color:#F0C36A; background:#FFF8E8}.chk.warn .chkh{color:#8A5A00}
+  .chk.bad{border-color:#d98c8a; background:#FCEEEE}.chk.bad .chkh{color:#A8322F}
+  @media (prefers-color-scheme:dark){.chk.ok{background:#17332a}.chk.warn{background:#3b2f14}.chk.bad{background:#3a1d1d}}
+  .chk .ev{color:var(--ink700); margin-top:3px; line-height:1.45}
+  .chk .fixline,.chk .cnote{margin-top:6px; color:var(--ink700)}
+  .vbox{margin-top:12px; padding:12px; border:1px dashed #F0C36A; border-radius:10px; background:#FFFBF1}
+  .vbox.done{border-color:#2D7A5F; background:#F1FAF6}
+  @media (prefers-color-scheme:dark){.vbox{background:#2b2412}.vbox.done{background:#14291f}}
+  .vchk{display:flex; align-items:center; gap:8px; font-size:.82rem; margin-bottom:8px; cursor:pointer}
+  .vta{min-height:56px; margin-bottom:0}
+  .xgrade{display:flex; gap:10px; margin-top:14px}
+  .xgrade .btn{flex:1; padding:11px}
+  .btn.good{border-color:#2D7A5F; color:#2D7A5F}
+  .btn.sel{background:var(--purple); color:#fff; border-color:var(--purple)}
+  .btn.good.sel{background:#2D7A5F; border-color:#2D7A5F; color:#fff}
+  .btn.link{font-size:.76rem; padding:6px 12px; margin:8px 6px 0 0}
+  .xopts{display:flex; flex-direction:column; gap:8px}
+  .xopt{text-align:left; font:inherit; font-size:.92rem; padding:12px 14px; border:1px solid var(--ink300); border-radius:12px; background:var(--card); color:var(--ink800); cursor:pointer}
+  .xopt:hover{border-color:var(--purple)}
+  .xopt.right{border-color:#2D7A5F; background:#EAF6F0; color:#1c4d3b}
+  .xopt.wrong{border-color:#A8322F; background:#FCEEEE; color:#7d2422}
+  @media (prefers-color-scheme:dark){.xopt.right{background:#17332a;color:#bfe6d6}.xopt.wrong{background:#3a1d1d;color:#f0b3b1}}
+  .res{font-family:var(--display); font-weight:700; font-size:.8rem; margin-bottom:8px}
+  .res.ok{color:#2D7A5F}.res.bad{color:#A8322F}
+  .xmatch{display:grid; grid-template-columns:1fr 1fr; gap:8px 12px}
+  .xmatch button{font:inherit; font-size:.86rem; padding:10px; border:1px solid var(--ink300); border-radius:10px; background:var(--card); color:var(--ink800); cursor:pointer}
+  .xmatch button.sel{border-color:var(--purple); background:var(--accent-soft,#efe6d4)}
+  .xmatch button.ok{border-color:#2D7A5F; background:#EAF6F0; color:#1c4d3b; cursor:default}
+  .xmatch button.no{border-color:#A8322F; background:#FCEEEE}
+  @media (prefers-color-scheme:dark){.xmatch button.ok{background:#17332a;color:#bfe6d6}.xmatch button.no{background:#3a1d1d}}
+  .xcirc{display:flex; flex-direction:column; gap:8px; margin-bottom:12px}
+  .xcirc button{text-align:left; font:inherit; font-size:.88rem; padding:11px 14px; border:1px solid var(--ink300); border-radius:12px; background:var(--card); color:var(--ink800); cursor:pointer}
+  .xcirc button.on{border-color:var(--purple); background:var(--accent-soft,#efe6d4)}
+  .xcirc button.right{border-color:#2D7A5F; background:#EAF6F0; color:#1c4d3b}
+  .xcirc button.wrong{border-color:#A8322F; background:#FCEEEE; color:#7d2422}
+  @media (prefers-color-scheme:dark){.xcirc button.right{background:#17332a;color:#bfe6d6}.xcirc button.wrong{background:#3a1d1d;color:#f0b3b1}}
+  .xdays{display:flex; flex-direction:column; gap:8px}
+  .xday{display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--ink200); border-radius:12px; background:var(--card)}
+  .xday.today{border-color:var(--purple); box-shadow:0 0 0 2px var(--accent-soft,#efe6d4)}
+  .xday.done{opacity:.6}
+  .xday .dn{font-family:var(--display); font-weight:700; font-size:.78rem; color:var(--purple); min-width:58px}
+  .xday .dt{flex:1; font-size:.84rem}
+  .xday .dt b{display:block; font-family:var(--display); font-size:.82rem; color:var(--indigo)}
+  .xday .dt small{color:var(--ink600); font-size:.74rem}
+  .xday .btn{padding:6px 12px; font-size:.76rem}
+  .tdy{font-size:.6rem; font-family:var(--display); font-weight:700; background:var(--purple); color:#fff; border-radius:999px; padding:1px 7px; margin-left:6px; vertical-align:middle}
+  .xscore{text-align:center; margin:18px 0}
+  .xscore .big{font-family:var(--display); font-weight:700; font-size:2.6rem; color:var(--indigo)}
+  .xmiss{margin:12px 0}
+
+/*EXAM_CSS_END*/
+</style>
+</head>
+<body>
+<div class="strip"></div>
+<div class="modebar"><div class="seg" id="modeSeg"><button data-mode="asana" class="on">Asanas</button><button data-mode="exam">Exam Prep</button></div></div>
+<div class="wrap" id="asanaApp">
+  <header>
+    <h1>Ashtanga Primary Series</h1>
+    <div class="sub">Yoga Chikitsa · names · drishti · cues · family / spine / energy</div>
+  </header>
+
+  <div class="controls">
+    <select id="filter"></select>
+    <div class="seg" id="dir">
+      <button data-dir="en" class="on">English</button>
+      <button data-dir="sa">Sanskrit</button>
+    </div>
+    <button class="btn" id="shuffle">Shuffle</button>
+    <button class="btn" id="hideLearned">Hide learned</button>
+  </div>
+  <div class="controls" style="margin-top:0">
+    <button class="btn primary" id="seqBtn">How to sequence</button>
+    <button class="btn primary" id="cueBtn">Cue by family</button>
+  </div>
+  <div class="progress"><span id="pbar"></span></div>
+  <div class="plabel" id="plabel"></div>
+
+  <div class="scene">
+    <div class="card" id="card">
+      <div class="face front">
+        <div class="toprow"><span class="tag" id="fTag"></span><span class="num" id="fNum"></span></div>
+        <div class="center">
+          <div class="figbox" id="fFig"></div>
+          <p class="prime" id="fPrime"></p>
+          <div class="pron" id="fPron"></div>
+          <div class="role-front" id="fRole"></div>
+        </div>
+        <div class="hint">tap to reveal</div>
+      </div>
+      <div class="face back">
+        <div class="toprow"><span class="tag" id="bTag"></span><span class="num" id="bNum"></span></div>
+        <div class="bhead"><div class="figbox-sm" id="bFig"></div><div><h2 id="bSanskrit"></h2><div class="eng" id="bEng"></div></div></div>
+        <div class="lens" id="bLens"></div>
+        <div class="rows">
+          <div class="row"><div class="k">Translation</div><div class="v" id="bTrans"></div></div>
+          <div class="row"><div class="k">Drishti</div><div class="v" id="bDrishti"></div></div>
+          <div class="row"><div class="k">Breath</div><div class="v" id="bBreath"></div></div>
+          <div class="row"><div class="k">In sequence</div><div class="v" id="bRole"></div></div>
+        </div>
+        <div class="cue"><div class="k">Breath-led cue</div><div id="bCue"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="btn" id="prev">‹ Prev</button>
+    <button class="btn learn" id="learn">Mark learned</button>
+    <button class="btn" id="next">Next ›</button>
+  </div>
+  <div class="keys">Keys: <kbd>Space</kbd> flip · <kbd>←</kbd><kbd>→</kbd> move · <kbd>L</kbd> learned · <kbd>S</kbd> shuffle</div>
+</div>
+
+<div class="wrap" id="examApp" style="display:none"></div>
+
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="shead"><h2 id="sheetTitle"></h2><button class="x" id="closeSheet">×</button></div>
+    <div class="sbody" id="sheetBody"></div>
+  </div>
+</div>
+
+<script>
+/* ===== Taxonomy ===== (3 lenses, per research synthesis)
+   Family  = pose-family identity (Stephens/Iyengar/Yoga Journal) — chunk & cue
+   Spine   = spinal action (Kaminoff) — cue safely & counter-pose
+   Energy  = brahmana(warming)/langhana(cooling)/samana(neutral) — the class arc
+   Data (Sanskrit/English/breath/drishti): MRY Manual 2026 pp.345-348.
+   Pronunciation, role, cues: added, editable. */
+const FAM={
+  sun:{label:"Sun Salutation",c:"#F77F00"}, standing:{label:"Standing",c:"#4CB944"},
+  balance:{label:"Balance",c:"#D6336C"}, forward:{label:"Forward Bend",c:"#3A86FF"},
+  backbend:{label:"Backbend",c:"#A8322F"}, twist:{label:"Twist",c:"#7209B7"},
+  hip:{label:"Hip Opener",c:"#2EC4B6"}, armbalance:{label:"Arm Balance",c:"#C78A00"},
+  core:{label:"Core",c:"#E63946"}, inversion:{label:"Inversion",c:"#3D51A3"},
+  seated:{label:"Seated",c:"#2D7A5F"}, rest:{label:"Rest",c:"#6B6B78"}
+};
+const SPINE={flexion:"Flexion (forward bend)",extension:"Extension (backbend)",rotation:"Rotation (twist)",lateral:"Lateral flexion (side bend)",axial:"Axial / neutral",varies:"Dynamic / varies"};
+const ENERGY={warming:{l:"Warming",v:"var(--warm)"},cooling:{l:"Cooling",v:"var(--cool)"},neutral:{l:"Neutral",v:"var(--neutral)"}};
+
+const DECK=[
+ {f:"sun",sp:"axial",e:"neutral",sa:"Samasthiti",en:"Equal Standing (Mountain)",pron:"sah-mah-STHEE-tee",tr:"Equal / steady standing",dr:"Nose (Nasagrai)",br:"Start & finish",role:"The home position — starts and ends every sun salutation; set breath, bandhas and drishti.",cue:"Stand tall, feet together, arms by the sides; ground the four corners of the feet, lift the crown, steady the ujjayi breath."},
+ {f:"sun",sp:"axial",e:"warming",sa:"Urdhva Hastasana",en:"Upward Salute",pron:"OORD-vah hah-STAH-sah-nah",tr:"Upward-hands posture",dr:"Thumbs (Angushtamadhye)",br:"Inhale",role:"Surya A, first movement — inhale, the arms sweep overhead.",cue:"Inhale, sweep the arms out and overhead, palms toward each other; lift the chest, gaze up to the thumbs."},
+ {f:"sun",sp:"flexion",e:"warming",sa:"Uttanasana",en:"Standing Forward Fold",pron:"oot-tah-NAH-sah-nah",tr:"Intense stretch posture",dr:"Nose (Nasagrai)",br:"Exhale",role:"Surya A & B — exhale, fold fully over the legs.",cue:"Exhale, hinge from the hips and fold over the legs, hands to the floor, crown releasing down."},
+ {f:"sun",sp:"axial",e:"warming",sa:"Ardha Uttanasana",en:"Half Forward Fold",pron:"ARD-hah oot-tah-NAH-sah-nah",tr:"Half intense stretch",dr:"Nose (Nasagrai)",br:"Inhale",role:"Surya A & B — inhale, half-lift to a flat back.",cue:"Inhale, lengthen the spine to a flat back, fingertips to the shins or floor, gaze forward."},
+ {f:"sun",sp:"axial",e:"warming",sa:"Chaturanga Dandasana",en:"Four-Limbed Staff",pron:"chah-tuh-RAHN-gah dahn-DAH-sah-nah",tr:"Four-limbed staff posture",dr:"Nose (Nasagrai)",br:"Exhale",role:"The vinyasa — exhale, lower to a low plank; the core of every transition.",cue:"Exhale, shift forward and lower halfway, elbows stacked over the wrists and hugging the ribs, shoulders no lower than the elbows."},
+ {f:"sun",sp:"extension",e:"warming",sa:"Urdhva Mukha Svanasana",en:"Upward-Facing Dog",pron:"OORD-vah MOO-kah shvah-NAH-sah-nah",tr:"Upward-facing dog posture",dr:"Nose / Upward",br:"Inhale",role:"The vinyasa — inhale, roll forward and open the chest.",cue:"Inhale, roll onto the tops of the feet, straighten the arms, lift the chest and thighs, shoulders rolling back and down."},
+ {f:"sun",sp:"axial",e:"warming",sa:"Adho Mukha Svanasana",en:"Downward-Facing Dog",pron:"AH-doh MOO-kah shvah-NAH-sah-nah",tr:"Downward-facing dog posture",dr:"Navel (Nabi Chakra)",br:"Exhale · 5 breaths",role:"The vinyasa's resting shape — exhale; held 5 breaths mid-sequence. (Surya B = Samasthiti → Utkatasana → this flow → Virabhadrasana A each side.)",cue:"Exhale, hips up and back to an inverted V, hands shoulder-width, spine long, heels reaching toward the floor; gaze to the navel."},
+
+ {f:"standing",sp:"flexion",e:"warming",sa:"Padangusthasana",en:"Big Toe Posture",pron:"pah-dahn-goosh-TAH-sah-nah",tr:"Foot big-toe posture",dr:"Nose (Nasagrai)",br:"5 breaths",role:"First standing pose — lengthens hamstrings, grounds the stance.",cue:"Exhale, fold and hook the big toes; inhale lengthen the chest; exhale fold deeper. Legs firm."},
+ {f:"standing",sp:"flexion",e:"warming",sa:"Padahastasana",en:"Hand to Foot Posture",pron:"pah-dah-hahs-TAH-sah-nah",tr:"Foot-to-hand posture",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Pairs with Padangusthasana — deepens the fold, frees the wrists.",cue:"Exhale, slide the palms under the feet; inhale lift and lengthen; exhale draw the crown toward the shins."},
+ {f:"standing",sp:"lateral",e:"warming",sa:"Utthita Trikonasana",en:"Extended Triangle",pron:"oo-TEE-tah tree-koh-NAH-sah-nah",tr:"Extended triangle posture",dr:"Hand (Hastagrai)",br:"5 breaths",role:"Opens the side body and hips; the standing block's first big shape.",cue:"Exhale, reach over the front leg and hook the big toe; open the chest up, gaze to the top hand."},
+ {f:"standing",sp:"rotation",e:"warming",sa:"Parivritta Trikonasana",en:"Revolved Triangle",pron:"par-ee-VREE-tah tree-koh-NAH-sah-nah",tr:"Revolved triangle posture",dr:"Hand (Hastagrai)",br:"5 breaths",role:"A standing twist — challenges balance, wrings the torso.",cue:"Inhale lengthen; exhale twist, opposite hand outside the front foot. Revolve from the navel, gaze up."},
+ {f:"standing",sp:"lateral",e:"warming",sa:"Utthita Parsvakonasana",en:"Extended Side Angle",pron:"oo-TEE-tah parsh-vah-koh-NAH-sah-nah",tr:"Extended side-angle posture",dr:"Hand (Hastagrai)",br:"5 breaths",role:"Builds leg strength and a long side-body line.",cue:"Exhale, front knee to 90°, hand outside the foot, top arm over the ear — one line, back heel to fingertips."},
+ {f:"standing",sp:"rotation",e:"warming",sa:"Parivritta Parsvakonasana",en:"Revolved Side Angle",pron:"par-ee-VREE-tah parsh-vah-koh-NAH-sah-nah",tr:"Revolved side-angle posture",dr:"Hand (Hastagrai)",br:"5 breaths",role:"Deep standing twist with strong legs.",cue:"Exhale, hook the opposite arm past the front knee, palm down. Press hands, lengthen the top side, gaze up."},
+ {f:"standing",sp:"flexion",e:"warming",sa:"Prasarita Padottanasana A",en:"Wide-Legged Forward Fold A",pron:"prah-sah-REE-tah pah-doh-tah-NAH-sah-nah",tr:"Spread-feet intense stretch",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Wide-leg folds — calm the mind, open inner legs (A→D deepen).",cue:"Hands to the mat shoulder-width; exhale, crown toward the floor, elbows bending straight back."},
+ {f:"standing",sp:"flexion",e:"warming",sa:"Prasarita Padottanasana B",en:"Wide-Legged Forward Fold B",pron:"prah-sah-REE-tah pah-doh-tah-NAH-sah-nah",tr:"Spread-feet intense stretch",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Hands-on-hips variation — teaches the hinge with a long spine.",cue:"Hands on hips; inhale open the chest, exhale fold with a long spine."},
+ {f:"standing",sp:"flexion",e:"warming",sa:"Prasarita Padottanasana C",en:"Wide-Legged Forward Fold C",pron:"prah-sah-REE-tah pah-doh-tah-NAH-sah-nah",tr:"Spread-feet intense stretch",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Adds a shoulder opener via the bound hands.",cue:"Interlace the hands behind; exhale fold and let the arms fall overhead, shoulders releasing."},
+ {f:"standing",sp:"flexion",e:"warming",sa:"Prasarita Padottanasana D",en:"Wide-Legged Forward Fold D",pron:"prah-sah-REE-tah pah-doh-tah-NAH-sah-nah",tr:"Spread-feet intense stretch",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Deepest of the four — closes the Prasarita set.",cue:"Exhale, catch the big toes; inhale lengthen, exhale draw the crown down between the feet."},
+ {f:"standing",sp:"flexion",e:"warming",sa:"Parsvottanasana",en:"Intense Side Stretch",pron:"parsh-voh-tah-NAH-sah-nah",tr:"Intense side-stretch posture",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Squares the hips; intense hamstring + shoulder opener.",cue:"Reverse-prayer hands; square the hips; exhale fold the chest over the straight front leg."},
+ {f:"balance",sp:"flexion",e:"warming",sa:"Utthita Hasta Padangusthasana A",en:"Extended Hand-to-Big-Toe (front)",pron:"oo-TEE-tah HAH-stah pah-dahn-goosh-TAH-sah-nah",tr:"Extended hand-to-big-toe posture",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Standing balance — focus and standing-leg strength.",cue:"Stand tall, catch the big toe, extend the leg forward; exhale chin toward the shin, standing leg strong."},
+ {f:"balance",sp:"lateral",e:"warming",sa:"Utthita Hasta Padangusthasana B",en:"Extended Hand-to-Big-Toe (side)",pron:"oo-TEE-tah HAH-stah pah-dahn-goosh-TAH-sah-nah",tr:"Extended hand-to-big-toe posture",dr:"Side (Parsva)",br:"5 breaths",role:"Opens the hip while balancing.",cue:"Exhale, open the leg to the side; gaze over the opposite shoulder, hips level."},
+ {f:"balance",sp:"axial",e:"warming",sa:"Utthita Hasta Padangusthasana C",en:"Extended Hand-to-Big-Toe (center)",pron:"oo-TEE-tah HAH-stah pah-dahn-goosh-TAH-sah-nah",tr:"Extended hand-to-big-toe posture",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Returns to center — steadies the balance.",cue:"Inhale draw the leg back to center and lift; hands to the hips, balance tall and still."},
+ {f:"balance",sp:"flexion",e:"warming",sa:"Ardha Baddha Padmottanasana",en:"Half-Bound-Lotus Forward Stretch",pron:"ARD-hah BAH-dah pahd-moh-tah-NAH-sah-nah",tr:"Half-bound lotus intense stretch",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Standing balance + first lotus prep for the seated work.",cue:"Foot into half lotus, bind behind the back; exhale fold, free hand to the floor by the standing foot."},
+ {f:"standing",sp:"axial",e:"warming",sa:"Utkatasana",en:"Fierce / Chair Posture",pron:"oot-kah-TAH-sah-nah",tr:"Fierce posture",dr:"Thumbs (Angushtamadhye)",br:"5 breaths",role:"Builds heat and leg strength; bridges toward the warriors. Also opens Surya Namaskara B.",cue:"Inhale, bend the knees deeply and sweep the arms up; sit the hips back, gaze to the thumbs."},
+ {f:"standing",sp:"extension",e:"warming",sa:"Virabhadrasana A",en:"Warrior I",pron:"veer-ah-bah-DRAH-sah-nah",tr:"Warrior posture (Virabhadra)",dr:"Upward (Urdhva)",br:"5 breaths",role:"Strength, focus, hip-flexor opening. Repeated each side within Surya Namaskara B.",cue:"Inhale, bend the front knee over the ankle, back heel grounded, arms reach up, gaze follows the hands."},
+ {f:"standing",sp:"axial",e:"warming",sa:"Virabhadrasana B",en:"Warrior II",pron:"veer-ah-bah-DRAH-sah-nah",tr:"Warrior posture (Virabhadra)",dr:"Hand (Hastagrai)",br:"5 breaths",role:"Stamina and groin opening — closes the standing series.",cue:"Exhale, open the arms and hips to the side; front knee tracks the second toe, gaze past the front hand."},
+ {f:"balance",sp:"axial",e:"warming",sa:"Vrksasana",en:"Tree Posture",pron:"vrik-SHAH-sah-nah",tr:"Tree posture",dr:"Open (as listed in the manual, p.398)",br:"5 breaths each side",role:"Single-leg balance from the Signature Sequence. The manual types it Standing & Balance. On the midterm Sanskrit list.",cue:"Inhale, root the standing foot and float the other foot to the inner calf or thigh, never the knee; exhale, hands to the heart or overhead and grow tall through the crown."},
+ {f:"balance",sp:"extension",e:"warming",sa:"Natarajasana",en:"Lord of the Dance Posture (Dancer)",pron:"not-ah-raj-AHS-anna",tr:"Lord of the Dance posture",dr:"Upward / lifted hand (manual p.400)",br:"5 breaths each side",role:"Balance plus backbend, from the Signature Sequence. The manual types it Standing & Balance / Backbend. On the midterm Sanskrit list.",cue:"Inhale, root the standing leg and catch the lifted foot behind you; exhale, kick the foot into the hand and reach the other arm forward and up, chest opening."},
+ {f:"standing",sp:"rotation",e:"warming",sa:"Parivritta Utkatasana",en:"Twisted Chair Posture (Revolved Chair)",pron:"PAHR-ee-VREE-tah OOT-kuh-TAHS-anna",tr:"Revolved fierce posture",dr:"Over the lifted shoulder (manual p.386)",br:"5 breaths each side",role:"Standing twist from the Signature Sequence. The manual types it Standing & Balance / Twist. On the midterm Sanskrit list.",cue:"Exhale, palms to the heart and hook the opposite elbow outside the knee; inhale, lengthen; exhale, twist from the ribs, thighs hugging in, gaze over the lifted shoulder."},
+ {f:"hip",sp:"flexion",e:"cooling",sa:"Malasana",en:"Garland Posture (Yogic Squat)",pron:"mah-LAHS-anna",tr:"Garland posture",dr:"Nose (manual p.388)",br:"5 breaths",role:"Deep squat and hip opener from the Signature Sequence. The manual types it as a hip opener (adductors open). On the midterm Sanskrit list.",cue:"Inhale, lengthen the spine; exhale, lower into a deep squat, feet wide, elbows pressing the knees open, palms together at the heart."},
+
+ {f:"seated",sp:"axial",e:"neutral",sa:"Dandasana",en:"Staff Posture",pron:"dahn-DAH-sah-nah",tr:"Staff posture",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Foundation of every seated pose — sets the spine and bandhas.",cue:"Legs extended, feet flexed; inhale press the hands down and lift the chest, spine stacked over the hips."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Paschimottanasana A",en:"Seated Forward Bend A",pron:"pash-ee-moh-tah-NAH-sah-nah",tr:"West (back-body) intense stretch",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Primary seated fold — calms the nervous system.",cue:"Catch the big toes; inhale lengthen the spine, exhale fold the belly to the thighs. Length first, depth second."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Paschimottanasana B",en:"Seated Forward Bend B",pron:"pash-ee-moh-tah-NAH-sah-nah",tr:"West (back-body) intense stretch",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Deeper grip on the feet.",cue:"Hold the outer edges of the feet; inhale open the chest, exhale draw the torso long over the legs."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Paschimottanasana C",en:"Seated Forward Bend C",pron:"pash-ee-moh-tah-NAH-sah-nah",tr:"West (back-body) intense stretch",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Deepest grip — wrist clasp beyond the feet.",cue:"Clasp one wrist beyond the feet; exhale fold deeper, elbows widening, shoulders soft."},
+ {f:"backbend",sp:"extension",e:"warming",sa:"Purvottanasana",en:"Upward Plank / Eastern Stretch",pron:"poor-voh-tah-NAH-sah-nah",tr:"East (front-body) intense stretch",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Counter-pose to the forward folds — opens the whole front body.",cue:"Hands behind, fingers forward; inhale press the hips up, point the toes, let the head release back."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Ardha Baddha Padma Paschimottanasana",en:"Half-Bound-Lotus Forward Bend",pron:"ARD-hah BAH-dah PAHD-mah pash-ee-moh-tah-NAH-sah-nah",tr:"Half-bound lotus west stretch",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Seated hip opener with a lotus bind.",cue:"One foot into half lotus, bind the toe behind; exhale fold over the extended leg."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Triang Mukha Ekapada Paschimottanasana",en:"Three-Limb Forward Bend",pron:"tree-AHNG MOO-kah EK-ah-pah-dah pash-ee-moh-tah-NAH-sah-nah",tr:"Three-limbs-facing one-foot stretch",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Asymmetrical fold — quad and ankle stretch.",cue:"Fold one shin back beside the hip; weight even, exhale and fold over the straight leg."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Janu Sirsasana A",en:"Head-to-Knee A",pron:"JAH-noo sheer-SHAH-sah-nah",tr:"Head-to-knee posture",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Head-to-knee folds — hamstrings with a gentle twist.",cue:"Bent-knee foot to the inner thigh; square to the straight leg, inhale lengthen, exhale fold."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Janu Sirsasana B",en:"Head-to-Knee B",pron:"JAH-noo sheer-SHAH-sah-nah",tr:"Head-to-knee posture",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Sitting onto the heel deepens the pelvic action.",cue:"Sit up onto the bent-knee heel under the perineum; exhale fold over the straight leg."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Janu Sirsasana C",en:"Head-to-Knee C",pron:"JAH-noo sheer-SHAH-sah-nah",tr:"Head-to-knee posture",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Intense ankle/foot action — approach with care.",cue:"Ball of the bent foot down, heel to the navel; exhale fold with care for the ankle."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Marichyasana A",en:"Marichi's Posture A",pron:"mar-ee-chee-AH-sah-nah",tr:"Dedicated to the sage Marichi",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Bound forward fold — shoulders and hamstrings.",cue:"One knee up, wrap the arm around the shin and bind behind; exhale fold over the straight leg."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Marichyasana B",en:"Marichi's Posture B",pron:"mar-ee-chee-AH-sah-nah",tr:"Dedicated to the sage Marichi",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Adds half lotus to the bind — deep hip work.",cue:"Opposite foot into half lotus, wrap and bind around the upright knee; exhale fold forward."},
+ {f:"twist",sp:"rotation",e:"cooling",sa:"Marichyasana C",en:"Marichi's Posture C",pron:"mar-ee-chee-AH-sah-nah",tr:"Dedicated to the sage Marichi",dr:"Side (Parsva)",br:"5 breaths",role:"Seated twist — spinal mobility, digestion, neutralizing.",cue:"Knee up, revolve the opposite elbow across it and bind; inhale lengthen, exhale twist, gaze over the shoulder."},
+ {f:"twist",sp:"rotation",e:"cooling",sa:"Marichyasana D",en:"Marichi's Posture D",pron:"mar-ee-chee-AH-sah-nah",tr:"Dedicated to the sage Marichi",dr:"Side (Parsva)",br:"5 breaths",role:"Bound twist with half lotus — the deepest Marichi.",cue:"Half lotus plus upright knee; revolve and bind around the knee; exhale deeper into the twist."},
+ {f:"core",sp:"flexion",e:"warming",sa:"Navasana",en:"Boat Posture",pron:"nah-VAH-sah-nah",tr:"Boat posture",dr:"Toes (Padayoragrai)",br:"5 breaths × 5",role:"Core work — abdominal strength and uddiyana bandha.",cue:"Lift the legs and chest into a V, arms reaching forward; 5 breaths, then cross and lift (Lolasana) between the 5 rounds."},
+ {f:"armbalance",sp:"flexion",e:"warming",sa:"Bhujapidasana",en:"Arm-Pressure Posture",pron:"boo-jah-pee-DAH-sah-nah",tr:"Arm-pressure posture",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Arm balance — focus and upper-body strength.",cue:"Shoulders behind the knees, hands down; exhale lift the feet, cross the ankles, float forward, crown toward the mat."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Kurmasana",en:"Tortoise Posture",pron:"koor-MAH-sah-nah",tr:"Tortoise posture",dr:"Third eye (Bhrumadhya)",br:"5 breaths",role:"Deep fold + hip opener — hamstrings and introspection.",cue:"Arms threaded under the knees; exhale extend the legs and chest toward the floor, long and flat."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Supta Kurmasana",en:"Sleeping Tortoise",pron:"SOOP-tah koor-MAH-sah-nah",tr:"Reclining tortoise posture",dr:"Third eye (Bhrumadhya)",br:"5 breaths",role:"Binds and compresses — the deepest fold of the series.",cue:"Bind the hands behind the back and cross the ankles behind the head; breathe softly, stay low."},
+ {f:"hip",sp:"flexion",e:"warming",sa:"Garbha Pindasana",en:"Womb-Embryo Posture",pron:"GAR-bah peen-DAH-sah-nah",tr:"Womb-embryo posture",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Lotus hip + core work with a rolling sequence.",cue:"In lotus, thread the arms through and cradle the head; hold, then roll in a circle on the breath."},
+ {f:"armbalance",sp:"flexion",e:"warming",sa:"Kukkutasana",en:"Rooster Posture",pron:"koo-koo-TAH-sah-nah",tr:"Rooster posture",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Lotus arm balance — follows straight out of Garbha Pindasana.",cue:"From the lotus-threaded arms, inhale and press the hands down to lift the whole body off the mat."},
+ {f:"hip",sp:"flexion",e:"cooling",sa:"Baddha Konasana",en:"Bound Angle Posture",pron:"BAH-dah koh-NAH-sah-nah",tr:"Bound-angle posture",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Hip opener — releases groin and inner thighs.",cue:"Soles together, heels close; inhale lengthen, exhale fold the chest forward, knees releasing down."},
+ {f:"hip",sp:"flexion",e:"cooling",sa:"Upavistha Konasana A",en:"Wide-Angle Seated Forward Bend",pron:"oo-pah-VEESH-tah koh-NAH-sah-nah",tr:"Seated wide-angle posture",dr:"Third eye (Bhrumadhya)",br:"5 breaths",role:"Wide-leg seated fold — hamstrings and adductors.",cue:"Legs wide, catch the outer feet; inhale lengthen, exhale fold the chest to the floor."},
+ {f:"balance",sp:"flexion",e:"cooling",sa:"Upavistha Konasana B",en:"Wide-Angle Balance",pron:"oo-pah-VEESH-tah koh-NAH-sah-nah",tr:"Seated wide-angle posture",dr:"Upward (Urdhva)",br:"5 breaths",role:"Balance on the sit-bones — core and focus.",cue:"Catch the feet and inhale, lift and balance on the sit-bones, legs wide, spine tall, gaze up."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Supta Konasana",en:"Reclining Angle Posture",pron:"SOOP-tah koh-NAH-sah-nah",tr:"Reclining angle posture",dr:"Navel (Nabi Chakra)",br:"5 breaths",role:"Dynamic roll — opens hamstrings, preps finishing.",cue:"Roll back, catch the toes overhead; inhale roll up to balance, exhale lower the heels lightly, lift the chest."},
+ {f:"hip",sp:"flexion",e:"cooling",sa:"Supta Padangusthasana",en:"Reclining Big-Toe Posture",pron:"SOOP-tah pah-dahn-goosh-TAH-sah-nah",tr:"Reclining big-toe posture",dr:"Toes / Side",br:"5 breaths",role:"Cooling reclining hamstring + hip opener.",cue:"Lying down, catch the big toe; exhale chin to the shin, then open the leg to the side, other hip grounded."},
+ {f:"balance",sp:"flexion",e:"cooling",sa:"Ubhaya Padangusthasana",en:"Both-Big-Toe Balance",pron:"oo-BYE-ah pah-dahn-goosh-TAH-sah-nah",tr:"Both-feet big-toe posture",dr:"Upward (Urdhva)",br:"5 breaths",role:"Balancing fold — core and hamstrings, preps finishing.",cue:"Roll back, catch both big toes; inhale roll up to balance on the sit-bones, straighten the legs, chest lifts."},
+ {f:"balance",sp:"flexion",e:"cooling",sa:"Urdhva Mukha Paschimottanasana",en:"Upward-Facing Forward Bend",pron:"OORD-vah MOO-kah pash-ee-moh-tah-NAH-sah-nah",tr:"Upward-facing west stretch",dr:"Toes (Padayoragrai)",br:"5 breaths",role:"Balancing fold — the last seated pose before backbends.",cue:"Roll up to balance holding the feet; exhale draw the legs toward the chest, spine long."},
+ {f:"backbend",sp:"extension",e:"warming",sa:"Setu Bandhasana",en:"Bridge Posture",pron:"SEH-too bahn-DAH-sah-nah",tr:"Bridge-construction posture",dr:"Nose (Nasagrai)",br:"5 breaths",role:"Gentle backbend — preps the spine for Urdhva Dhanurasana.",cue:"Crown to the mat, feet turned out; inhale press the feet and lift the hips, arching onto the crown. (Primary-series Setu differs from the common bridge.)"},
+ {f:"backbend",sp:"extension",e:"warming",sa:"Urdhva Dhanurasana",en:"Upward Bow / Wheel",pron:"OORD-vah dahn-oor-AH-sah-nah",tr:"Upward-bow posture",dr:"Nose (Nasagrai)",br:"5 breaths × 3",role:"Peak of the series — energizing; must be countered by a forward fold.",cue:"Hands by the ears, feet hip-width; inhale press up to the full backbend. Repeat 3 times, then rest."},
+ {f:"forward",sp:"flexion",e:"cooling",sa:"Paschimottanasana (closing)",en:"Seated Forward Bend (counter)",pron:"pash-ee-moh-tah-NAH-sah-nah",tr:"West intense stretch",dr:"Toes (Padayoragrai)",br:"10 breaths",role:"Neutralizing counter-pose after the backbends.",cue:"Catch the feet, inhale long, exhale fold and stay for 10 calm breaths."},
+
+ {f:"inversion",sp:"flexion",e:"cooling",sa:"Salamba Sarvangasana",en:"Shoulderstand",pron:"sah-LAHM-bah sar-vahn-GAH-sah-nah",tr:"Supported whole-body posture",dr:"Nose (Nasagrai)",br:"25 breaths",role:"Finishing inversions begin — calms and cools the system.",cue:"Lift the legs vertical, hands supporting the back; lengthen up, chin soft to the chest, weight in the shoulders not the neck."},
+ {f:"inversion",sp:"flexion",e:"cooling",sa:"Halasana",en:"Plough Posture",pron:"hah-LAH-sah-nah",tr:"Plough posture",dr:"Nose (Nasagrai)",br:"8 breaths",role:"Deepens the inversion — stretches the whole spine.",cue:"From shoulderstand, exhale the feet to the floor overhead; hands clasp or support the back, throat soft."},
+ {f:"inversion",sp:"flexion",e:"cooling",sa:"Karnapidasana",en:"Ear-Pressure Posture",pron:"kar-nah-pee-DAH-sah-nah",tr:"Ear-pressure posture",dr:"Nose (Nasagrai)",br:"8 breaths",role:"Introspective inversion — releases the back body.",cue:"From the plough, bend the knees beside the ears; soften and breathe into the back body."},
+ {f:"inversion",sp:"axial",e:"cooling",sa:"Urdhva Padmasana",en:"Upward Lotus",pron:"OORD-vah pahd-MAH-sah-nah",tr:"Upward lotus posture",dr:"Nose (Nasagrai)",br:"8 breaths",role:"Lotus balance on the shoulders — control and poise.",cue:"From shoulderstand, fold the legs into lotus and balance the knees on the hands, lifting through the lotus."},
+ {f:"inversion",sp:"flexion",e:"cooling",sa:"Pindasana",en:"Embryo Posture",pron:"peen-DAH-sah-nah",tr:"Embryo posture",dr:"Nose (Nasagrai)",br:"8 breaths",role:"Compact lotus inversion — compression and calm.",cue:"Keep the lotus, exhale and lower the knees toward the forehead, wrap the arms around; stay compact, breathe."},
+ {f:"backbend",sp:"extension",e:"warming",sa:"Matsyasana",en:"Fish Posture",pron:"mahts-YAH-sah-nah",tr:"Fish posture",dr:"Third eye (Bhrumadhya)",br:"8 breaths",role:"Counter-pose to shoulderstand — opens throat and chest.",cue:"Stay in lotus, lie back and arch the chest, crown to the mat; open the throat, breathe into the heart."},
+ {f:"backbend",sp:"extension",e:"warming",sa:"Uttana Padasana",en:"Extended-Leg Posture",pron:"oo-TAH-nah pah-DAH-sah-nah",tr:"Extended-leg posture",dr:"Nose (Nasagrai)",br:"8 breaths",role:"Completes the shoulderstand counter — core and chest.",cue:"Release the lotus, lift the straight legs to 45° and reach the arms parallel, chest arching, crown down."},
+ {f:"inversion",sp:"axial",e:"warming",sa:"Sirsasana",en:"Headstand",pron:"sheer-SHAH-sah-nah",tr:"Headstand posture",dr:"Nose (Nasagrai)",br:"25 breaths",role:"The finishing headstand — stimulating; focus and stillness.",cue:"Crown down, forearms rooted; inhale lift the legs to vertical, press the forearms down — 90% weight in the arms, strong and still."},
+ {f:"seated",sp:"flexion",e:"cooling",sa:"Balasana",en:"Child's Posture (rest)",pron:"bah-LAH-sah-nah",tr:"Child's posture",dr:"Nose (Nasagrai)",br:"10 breaths",role:"Rest after the headstand — neutralizes the spine.",cue:"Hips to the heels, forehead down; let the breath settle before the finishing lotus."},
+ {f:"seated",sp:"axial",e:"cooling",sa:"Baddha Padmasana",en:"Bound Lotus",pron:"BAH-dah pahd-MAH-sah-nah",tr:"Bound-lotus posture",dr:"Third eye (Bhrumadhya)",br:"10 breaths",role:"Seated finishing — turns the practice inward.",cue:"In lotus, cross the arms behind and bind the big toes; inhale tall, exhale fold the chin toward the chest."},
+ {f:"seated",sp:"flexion",e:"cooling",sa:"Yoga Mudra",en:"Sealed Lotus Fold",pron:"YOH-gah MOO-drah",tr:"Yogic seal",dr:"Third eye (Bhrumadhya)",br:"10 breaths",role:"Surrender and seal — deep inward fold.",cue:"From the bound lotus, exhale and fold the chin toward the floor; surrender the breath, gaze inward."},
+ {f:"seated",sp:"axial",e:"neutral",sa:"Padmasana",en:"Lotus Posture",pron:"pahd-MAH-sah-nah",tr:"Lotus posture",dr:"Nose (Nasagrai)",br:"25 breaths",role:"Seated lotus — breath, bandha and meditation.",cue:"Sit tall in lotus, hands on the knees; settle the breath, apply the bandhas, steady inward gaze."},
+ {f:"armbalance",sp:"axial",e:"warming",sa:"Utpluthih / Tolasana",en:"Scales / Uprooting",pron:"oot-PLOO-tee · toh-LAH-sah-nah",tr:"Lifting-up / scales posture",dr:"Nose (Nasagrai)",br:"10 breaths",role:"Final lift — seals the practice with bandha strength.",cue:"Hands beside the hips; inhale press down and lift the lotus off the floor, drawing up the bandhas for 10 breaths."},
+ {f:"rest",sp:"axial",e:"cooling",sa:"Savasana",en:"Corpse Posture",pron:"shah-VAH-sah-nah",tr:"Corpse posture",dr:"Eyes closed",br:"Rest",role:"Complete rest — absorption and integration of the practice.",cue:"Release everything. Legs fall open, palms up, breath natural. Let the practice integrate — take rest."}
+];
+
+/* ===== Guides ===== */
+const SEQ_HTML=`
+<h3>The arc of a class</h3>
+<div class="arc" id="arcChips"></div>
+<p>Energy rises to a peak, then settles to rest (the "bell curve"). Ashtanga bakes this in: Sun Salutations build heat, standing work strengthens, seated work goes deep, and the finishing inversions &amp; lotus cool and seal before Savasana. Rough time split: warm-up 15–20% · standing/heat 20–25% · floor &amp; peak 20–25% · cooling 15–20% · Savasana 15–20%.</p>
+
+<h3>Which family goes where — and why</h3>
+<p>Three forces decide a family's slot: <b>warmth needed</b> (deeper openers come later), <b>energy</b> (warming/brahmana climbs to the peak, cooling/langhana descends), and <b>spinal direction</b> (leave the spine neutral before loading the opposite direction).</p>
+<table class="maptbl">
+<tr><th>Family</th><th>Where</th><th>Why</th></tr>
+<tr><td><b>Sun Salutation</b></td><td>Open</td><td>Warms the whole body, links breath to movement.</td></tr>
+<tr><td><b>Standing</b></td><td>Early</td><td>Most efficient full-body warmer; builds leg/hip strength and the openings later work needs.</td></tr>
+<tr><td><b>Balance</b></td><td>End of standing</td><td>Focus &amp; heat are high, fatigue hasn't set in.</td></tr>
+<tr><td><b>Core / Arm balance</b></td><td>Mid, near peak</td><td>Core precedes arm balances; teaches the bandha support deeper work needs.</td></tr>
+<tr><td><b>Backbend</b></td><td>At the peak</td><td>Most heat-demanding &amp; stimulating; needs a fully warm spine, hips, shoulders.</td></tr>
+<tr><td><b>Twist</b></td><td>After backbends</td><td>Re-stabilizes the spine, releases extension, begins the cool-down.</td></tr>
+<tr><td><b>Forward bend</b></td><td>Downslope</td><td>Universal neutralizer; cooling; counters the backbends.</td></tr>
+<tr><td><b>Hip opener</b></td><td>Late</td><td>Hips open best fully warm; internalizing — sets up sitting for rest.</td></tr>
+<tr><td><b>Inversion</b></td><td>Near the end</td><td>Body warm, neck prepared; supported inversions cool &amp; calm. (Headstand is stimulating, shoulderstand calming.)</td></tr>
+<tr><td><b>Seated / Rest</b></td><td>Last</td><td>Settle the spine, meditate, then Savasana — always.</td></tr>
+</table>
+
+<h3>Counter-pose rules</h3>
+<ul>
+ <li><b>Forward bend is the universal neutralizer</b> — the hub of the wheel; it resets the spine after almost anything.</li>
+ <li><b>Never twist straight off a deep backbend.</b> Neutralize first (gentle forward motion), then twist.</li>
+ <li><b>Don't place opposite deep movements back-to-back</b> — put a neutralizer between them.</li>
+ <li><b>Counter proportionally</b> — match intensity with a few gentler poses, not one dramatic opposite.</li>
+</ul>
+
+<h3>Build a class from a peak pose (4 steps)</h3>
+<ul>
+ <li><b>1. Pick the peak</b> and analyze what it needs — which joints open, what strengthens, what alignment.</li>
+ <li><b>2. Break it into 3–5 component actions.</b></li>
+ <li><b>3. Choose prep poses that rehearse each action</b>, ordered simple → complex; the poses just before the peak should mirror it.</li>
+ <li><b>4. Peak, then counter-pose &amp; integrate</b> (last ~20–25%), down to Savasana.</li>
+</ul>
+
+<h3>Warming vs cooling (brahmana / langhana)</h3>
+<p>You can tune the same pose with the breath. <b>Brahmana</b> (energizing) emphasizes the inhale — backbends, standing, Sun Salutations. <b>Langhana</b> (calming) emphasizes the exhale — forward bends, twists, restoratives. <b>Samana</b> (neutral) balances both — Tadasana, Dandasana, Lotus. Ride brahmana up to the peak, langhana down to rest.</p>
+
+<p class="src">Sources: Mark Stephens, <i>Yoga Sequencing</i>; Krishnamacharya/Desikachar (vinyasa krama, brahmana/langhana); Kaminoff, <i>Yoga Anatomy</i>; Yoga International; ACE; Sequence Wiz. Your MRY manual (p.57) supplies the same arc.</p>
+`;
+
+const CUEFAM={
+ sun:{pr:"One breath, one movement — the breath leads, the body follows.",cues:["Start the inhale a hair before the arms rise; finish the movement as the breath ends.","Move through Chaturanga with control — elbows hug in, shoulders no lower than the elbows.","Let the Ujjayi breath set the tempo for the whole room."],guard:"Shoulders &amp; wrists — build the Chaturanga gradually."},
+ standing:{pr:"Built from the ground up — root the feet, then stack the joints.",cues:["Root all four corners of each foot like tent stakes; lift the arches.","Stack ankle, knee, hip, shoulder into one line.","Keep a micro-bend — never lock or hyperextend the knee.","Tailbone neither tucked nor flared — just long."],guard:"Knees &amp; arches — guard against collapse and hyperextension."},
+ balance:{pr:"A fixed gaze, a rooted standing leg, and a calm breath.",cues:["Fix the drishti on one unmoving point — the gaze is the anchor.","Root the four corners of the standing foot.","Soft, spongy bend in the standing knee — never locked.","Navel to spine; when you wobble, return to the gaze and breathe."],guard:"Standing knee — never lock it, never place the lifted foot on the knee."},
+ forward:{pr:"Hinge from the hips; length over depth.",cues:["Fold from the hip creases, not the waist.","Lead with the heart toward the legs, not the head.","Soften the knees so the spine can lengthen.","Root the legs and press the heels to lift and lengthen the spine."],guard:"Hamstrings &amp; low back — never fold through a rounded lumbar."},
+ backbend:{pr:"Lengthen before you bend; spread the bend into the upper back.",cues:["Grow tall through the spine first, then arc back.","Open the chest — don't crunch the low back.","Chin slightly in; bend the upper spine, not the neck.","Press the feet, firm the glutes to support the pelvis."],guard:"Low back &amp; neck — warm up first; neutralize before folding forward."},
+ twist:{pr:"Lengthen on the inhale, rotate on the exhale, from the mid-spine.",cues:["Grow tall through the crown, then turn from the navel and ribs.","Root both sitting bones — don't let a hip lift.","Breath is the limit: if you can't breathe smoothly, ease off.","The arm supports the twist — it doesn't crank it."],guard:"Breath capacity &amp; a neutral spine first — don't force depth."},
+ hip:{pr:"Open the hip, protect the knee.",cues:["Let the movement come from the hip socket, not the knee.","Flex the foot to lock in and guard the knee.","Square the hips so you don't torque the sacrum.","Any pinch in the knee — back off immediately."],guard:"Knee — it's most at risk when bent and rotated together."},
+ armbalance:{pr:"Balance and weight placement over raw strength.",cues:["Gaze forward to the front of the mat — look down and you tip down.","Spread the fingers and grip the floor (hasta bandha).","Shift the weight forward until the feet get light.","Hug the midline, draw the navel up, lift via the bandhas."],guard:"Wrists — warm them and build gradually; practice over a cushion."},
+ core:{pr:"Lift from the deep core and bandhas, not by straining the neck.",cues:["Draw the navel in and up (uddiyana) and lift the pelvic floor (mula).","Hug the low ribs in — don't let the belly dome.","Length through the spine even as you curl.","Find the effort on the exhale."],guard:"Low back — keep it supported, not overarched."},
+ inversion:{pr:"Foundation first — the neck is never a weight-bearing column.",cues:["Build the base (forearms/shoulders) before the legs lift.","Headstand: ~90% of the weight in the forearms, 10% on the head.","Lift and spread the shoulder blades; shoulders away from the ears.","Keep the back of the neck long; gaze and head stay still."],guard:"Neck — use firm blankets under shoulderstand. Avoid with neck/eye/BP issues, pregnancy."},
+ seated:{pr:"Ground the sit bones, lengthen up, engage the bandhas.",cues:["Rock onto the sit bones and grow tall out of the pelvis.","Lift the pelvic floor and draw the navel gently up.","Kneecaps point up — don't let the thighs roll out.","Settle the breath; let the gaze turn inward."],guard:"Lumbar &amp; knees — prop the seat on a blanket if the pelvis can't tilt forward."},
+ rest:{pr:"Complete stillness — nothing to do, nowhere to be.",cues:["Let the body be fully heavy; release every muscle.","Soften the jaw, the eyes, the breath.","Stay at least 5–7 minutes; this is where the practice integrates."],guard:"Warmth — cover up; the body cools quickly at rest."}
+};
+
+/* ===== Pose images (verified; files in assets/poses/) ===== */
+const PHOTO={
+ "Savasana":"ai/savasana.png",
+ "Samasthiti":"ai/samasthiti.png",
+ "Urdhva Hastasana":"ai/urdhva-hastasana.png",
+ "Uttanasana":"ai/uttanasana.png",
+ "Ardha Uttanasana":"ai/ardha-uttanasana.png",
+ "Chaturanga Dandasana":"ai/chaturanga.png",
+ "Urdhva Mukha Svanasana":"ai/up-dog.png",
+ "Adho Mukha Svanasana":"ai/down-dog.png",
+ "Padangusthasana":"ai/padangusthasana.png",
+ "Padahastasana":"ai/padahastasana.png",
+ "Utthita Trikonasana":"ai/trikonasana.png",
+ "Parivritta Trikonasana":"ai/parivritta-trikonasana.png",
+ "Utthita Parsvakonasana":"ai/parsvakonasana.png",
+ "Parivritta Parsvakonasana":"ai/parivritta-parsvakonasana.png",
+ "Prasarita Padottanasana A":"ai/prasarita-a.png",
+ "Prasarita Padottanasana B":"ai/prasarita-b.png",
+ "Prasarita Padottanasana C":"ai/prasarita-c.png",
+ "Prasarita Padottanasana D":"ai/prasarita-d.png",
+ "Parsvottanasana":"ai/parsvottanasana.png",
+ "Utthita Hasta Padangusthasana A":"ai/uhp-a.png",
+ "Utthita Hasta Padangusthasana B":"ai/uhp-b.png",
+ "Utthita Hasta Padangusthasana C":"ai/uhp-c.png",
+ "Ardha Baddha Padmottanasana":"ai/ardha-baddha-padmottanasana.png",
+ "Padmasana":"ai/padmasana.png",
+ "Utpluthih / Tolasana":"ai/utpluthih.png",
+ "Paschimottanasana A":"ai/paschimottanasana-a.png",
+ "Paschimottanasana B":"ai/paschimottanasana-b.png",
+ "Paschimottanasana C":"ai/paschimottanasana-c.png",
+ "Paschimottanasana (closing)":"ai/paschimottanasana-a.png",
+ "Janu Sirsasana A":"ai/janu-sirsasana-a.png",
+ "Janu Sirsasana B":"ai/janu-sirsasana-b.png",
+ "Janu Sirsasana C":"ai/janu-sirsasana-c.png",
+ "Marichyasana A":"ai/marichyasana-a.png",
+ "Marichyasana B":"ai/marichyasana-b.png",
+ "Marichyasana C":"ai/marichyasana-c.png",
+ "Marichyasana D":"ai/marichyasana-d.png",
+ "Navasana":"ai/navasana.png",
+ "Bhujapidasana":"ai/bhujapidasana.png",
+ "Kurmasana":"ai/kurmasana.png",
+ "Garbha Pindasana":"ai/garbha-pindasana.png",
+ "Kukkutasana":"ai/kukkutasana.png",
+ "Baddha Konasana":"ai/baddha-konasana.png",
+ "Upavistha Konasana A":"ai/upavistha-konasana-a.png",
+ "Supta Padangusthasana":"ai/supta-padangusthasana.png",
+ "Ubhaya Padangusthasana":"ai/ubhaya-padangusthasana.png",
+ "Urdhva Mukha Paschimottanasana":"ai/urdhva-mukha-paschimottanasana.png",
+ "Setu Bandhasana":"ai/setu-bandhasana.png",
+ "Urdhva Dhanurasana":"ai/urdhva-dhanurasana.png",
+ "Sirsasana":"ai/sirsasana.png",
+ "Balasana":"ai/balasana.png",
+ "Dandasana":"ai/dandasana.png",
+ "Virabhadrasana A":"ai/virabhadrasana-a.png",
+ "Virabhadrasana B":"ai/virabhadrasana-b.png",
+ "Utkatasana":"ai/utkatasana.png",
+ "Purvottanasana":"ai/purvottanasana.png",
+ "Ardha Baddha Padma Paschimottanasana":"ai/ardha-baddha-padma-paschimottanasana.png",
+ "Supta Kurmasana":"ai/supta-kurmasana.png",
+ "Salamba Sarvangasana":"ai/sarvangasana.png",
+ "Halasana":"ai/halasana.png",
+ "Karnapidasana":"ai/karnapidasana.png",
+ "Urdhva Padmasana":"ai/urdhva-padmasana.png",
+ "Matsyasana":"ai/matsyasana.png",
+ "Baddha Padmasana":"ai/baddha-padmasana.png",
+ "Triang Mukha Ekapada Paschimottanasana":"ai/triang-mukha-ekapada-paschimottanasana.png",
+ "Supta Konasana":"ai/supta-konasana.png",
+ "Upavistha Konasana B":"ai/upavistha-konasana-b.png",
+ "Pindasana":"ai/pindasana.png",
+ "Uttana Padasana":"ai/uttana-padasana.png",
+ "Yoga Mudra":"ai/yoga-mudra.png",
+};
+
+/* ===== App ===== */
+const LS="ashtanga_learned_v3";
+let learned=new Set(JSON.parse(localStorage.getItem(LS)||"[]"));
+let dir="en", hideLearned=false, filterVal="all", order=[], pos=0;
+const $=id=>document.getElementById(id);
+const card=$("card");
+const key=c=>c.sa;
+
+// build filter dropdown (grouped)
+(function(){
+  const sel=$("filter");
+  sel.innerHTML="";
+  const all=document.createElement("option"); all.value="all"; all.textContent="All poses"; sel.appendChild(all);
+  const gF=document.createElement("optgroup"); gF.label="Family";
+  Object.entries(FAM).forEach(([k,v])=>{if(DECK.some(c=>c.f===k)){const o=document.createElement("option");o.value="f:"+k;o.textContent=v.label;gF.appendChild(o);}});
+  sel.appendChild(gF);
+  const gS=document.createElement("optgroup"); gS.label="Spinal action";
+  Object.entries(SPINE).forEach(([k,v])=>{if(DECK.some(c=>c.sp===k)){const o=document.createElement("option");o.value="sp:"+k;o.textContent=v;gS.appendChild(o);}});
+  sel.appendChild(gS);
+  const gE=document.createElement("optgroup"); gE.label="Energy";
+  Object.entries(ENERGY).forEach(([k,v])=>{if(DECK.some(c=>c.e===k)){const o=document.createElement("option");o.value="e:"+k;o.textContent=v.l;gE.appendChild(o);}});
+  sel.appendChild(gE);
+})();
+
+function match(c){
+  if(filterVal==="all")return true;
+  const [dim,val]=filterVal.split(":");
+  return (dim==="f"&&c.f===val)||(dim==="sp"&&c.sp===val)||(dim==="e"&&c.e===val);
+}
+function buildOrder(){
+  order=DECK.map((c,i)=>i).filter(i=>{const c=DECK[i]; if(!match(c))return false; if(hideLearned&&learned.has(key(c)))return false; return true;});
+  if(order.length===0)order=DECK.map((c,i)=>i);
+  pos=0;
+}
+function shuffle(){for(let i=order.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[order[i],order[j]]=[order[j],order[i]];}pos=0;}
+
+function render(){
+  card.classList.remove("flipped");
+  const c=DECK[order[pos]], fam=FAM[c.f], col=fam.c;
+  card.querySelector(".front").style.setProperty("--cat",col);
+  card.querySelector(".back").style.setProperty("--cat",col);
+  $("fTag").textContent=$("bTag").textContent=fam.label;
+  $("fTag").style.background=$("bTag").style.background=col;
+  $("fNum").textContent=$("bNum").textContent=(pos+1)+" / "+order.length;
+  const en=dir==="en";
+  $("fPrime").textContent=en?c.en:c.sa;
+  $("fPrime").className="prime"+(en?"":" sa");
+  $("fPron").textContent=en?"":c.pron;
+  $("fRole").textContent=c.role;
+  const photo=PHOTO[c.sa];
+  if(photo){
+    $("fFig").innerHTML=`<img class="poseimg" src="assets/poses/${photo}" alt="${c.en}" loading="lazy">`;
+    $("bFig").innerHTML=`<img class="poseimg sm" src="assets/poses/${photo}" alt="">`;
+  }else{
+    $("fFig").innerHTML=`<div class="noimg">image coming soon</div>`;
+    $("bFig").innerHTML=`<div class="noimg sm">—</div>`;
+  }
+  $("bSanskrit").textContent=c.sa;
+  $("bEng").textContent=c.en+"  ·  "+c.pron;
+  $("bLens").innerHTML=
+    `<span class="chip"><span class="dot" style="background:${col}"></span>${fam.label}</span>`+
+    `<span class="chip">${SPINE[c.sp]}</span>`+
+    `<span class="chip"><span class="dot" style="background:${ENERGY[c.e].v}"></span>${ENERGY[c.e].l}</span>`;
+  $("bTrans").textContent=c.tr; $("bDrishti").textContent=c.dr; $("bBreath").textContent=c.br; $("bRole").textContent=c.role; $("bCue").textContent=c.cue;
+  const isL=learned.has(key(c));
+  $("learn").classList.toggle("on",isL);
+  $("learn").textContent=isL?"✓ Learned":"Mark learned";
+  const total=DECK.length,done=DECK.filter(c=>learned.has(key(c))).length;
+  $("pbar").style.width=(done/total*100)+"%";
+  $("plabel").innerHTML=`<b>${done}</b> of ${total} learned · card ${pos+1} of ${order.length} in view`;
+}
+function go(d){pos=(pos+d+order.length)%order.length;render();}
+function toggleLearned(){const c=DECK[order[pos]],k=key(c); if(learned.has(k))learned.delete(k);else learned.add(k); localStorage.setItem(LS,JSON.stringify([...learned])); if(hideLearned){buildOrder();render();}else render();}
+
+function openSeq(){
+  $("sheetTitle").textContent="How to sequence";
+  $("sheetBody").innerHTML=SEQ_HTML;
+  const chips=$("arcChips");
+  const arc=[["Center","rest"],["Warm","sun"],["Build","standing"],["Peak","backbend"],["Descend","twist"],["Cool","forward"],["Invert","inversion"],["Rest","rest"]];
+  arc.forEach(([n,f],i)=>{const s=document.createElement("span");s.textContent=n;s.style.background=FAM[f].c;chips.appendChild(s); if(i<arc.length-1){const a=document.createElement("i");a.textContent="→";chips.appendChild(a);}});
+  $("overlay").classList.add("open");
+}
+function openCue(){
+  $("sheetTitle").textContent="Cue by family";
+  let html="<p>Every family has a governing principle, its signature cues, and one joint to protect. Entry cues pair to the breath: <b>inhale to lengthen/lift, exhale to fold/deepen/twist.</b></p>";
+  Object.entries(FAM).forEach(([k,v])=>{
+    if(!CUEFAM[k]||!DECK.some(c=>c.f===k))return;
+    const g=CUEFAM[k];
+    html+=`<div class="fam" style="--fc:${v.c}"><h4>${v.label}</h4><p class="pr">${g.pr}</p><ul>`+
+      g.cues.map(x=>`<li>${x}</li>`).join("")+`</ul><div class="guard"><b>Protect:</b> ${g.guard}</div></div>`;
+  });
+  html+=`<p class="src">Sources: Yoga Journal, Yoga International, Jason Crandell, Mark Stephens, Ghosh Yoga, Ekhart Yoga, Brett Larkin. Breath-led cue style per the Ashtanga method.</p>`;
+  $("sheetBody").innerHTML=html;
+  $("overlay").classList.add("open");
+}
+
+card.onclick=()=>card.classList.toggle("flipped");
+$("prev").onclick=()=>go(-1); $("next").onclick=()=>go(1); $("learn").onclick=toggleLearned;
+$("shuffle").onclick=()=>{shuffle();render();};
+$("filter").onchange=function(){filterVal=this.value;buildOrder();render();};
+$("hideLearned").onclick=function(){hideLearned=!hideLearned;this.textContent=hideLearned?"Show all":"Hide learned";buildOrder();render();};
+$("seqBtn").onclick=openSeq; $("cueBtn").onclick=openCue;
+$("closeSheet").onclick=()=>$("overlay").classList.remove("open");
+$("overlay").onclick=e=>{if(e.target===$("overlay"))$("overlay").classList.remove("open");};
+document.querySelectorAll("#dir button").forEach(b=>b.onclick=function(){document.querySelectorAll("#dir button").forEach(x=>x.classList.remove("on"));this.classList.add("on");dir=this.dataset.dir;render();});
+document.addEventListener("keydown",e=>{
+  if(window.MODE==="exam")return;
+  if($("overlay").classList.contains("open")){if(e.key==="Escape")$("overlay").classList.remove("open");return;}
+  if(e.code==="Space"){e.preventDefault();card.classList.toggle("flipped");}
+  else if(e.key==="ArrowLeft")go(-1); else if(e.key==="ArrowRight")go(1);
+  else if(e.key.toLowerCase()==="l")toggleLearned(); else if(e.key.toLowerCase()==="s"){shuffle();render();}
+});
+window.showPose=function(sa){ if(window.setMode)window.setMode("asana"); filterVal="all"; $("filter").value="all"; buildOrder(); const i=DECK.findIndex(c=>c.sa===sa); if(i>=0){const k=order.indexOf(i); pos=k<0?0:k;} render(); window.scrollTo(0,0); };
+buildOrder();render();
+</script>
+<!--EXAM_BLOCK_START-->
+<script>
+/*EXAM_DATA_START*/
+const EXAM={"topics": [{"id": "ashtanga", "name": "Ashtanga Yoga"}, {"id": "ancient", "name": "Ancient Texts"}, {"id": "history", "name": "Modern History of Yoga"}, {"id": "breath", "name": "Breath and Meditation"}, {"id": "anatomy", "name": "Anatomy"}, {"id": "energetic", "name": "Energetic Anatomy"}, {"id": "sanskrit", "name": "Sanskrit"}, {"id": "teaching", "name": "Teaching Methodology"}, {"id": "beginners", "name": "Beginners"}, {"id": "sequencing", "name": "Creative Sequencing"}], "items": [{"topic": "ashtanga", "type": "recall", "q": "Define parampara.", "a": "Parampara is the traditional transmission of yoga knowledge through an unbroken lineage, from guru to student. In Ashtanga, postures are done with correct alignment and proper guidance by a guru following parampara; the teacher guides the student through psychological/physical blocks (granthis/samskaras) so they don't waver from the path. (MRY Manual, Ashtanga/Tristana)", "w": false, "mytype": false, "flag": false, "id": "003", "ord": 0, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 45, "q": "Postures should be done with correct alignment and proper guidance by a guru"}], "fix": "Manual only gives: postures are done with correct alignment and proper guidance by a guru following parampara (p.45, with Kino MacGregor quote on teacher guiding students through granthis/psychological blocks). The wording 'unbroken lineage from guru to student' is not in the materials.", "note": "Searched all 5 files for parampara; only manual p.45 uses the word; no one-line definition (Weekend 1 study Q5 p.66 asks it but gives no answer)."}}, {"topic": "ashtanga", "type": "recall", "q": "List and explain the 3 bandhas practiced in the Ashtanga method.", "a": "Bandha = “lock/seal” — activating isolated muscle groups to control the flow of prana; all three together = Maha Bandha (the Great Bandha). (1) UDDIYANA bandha (belly lock): ~2 in. below the navel, drawn toward the spine with a soft upper abdomen — lifts the lower belly for core strength and lightness. (2) MULA bandha (root lock): base of the spine — a firm lift of the pelvic floor at the perineum. (3) JALANDHARA bandha (chin lock): chin extends forward then draws back toward the throat where the clavicles meet. (MRY Manual p.45)", "w": false, "mytype": false, "flag": false, "id": "005", "ord": 1, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 45, "q": "When all three locks are engaged, this is called “Maha Bandha” or “The Great Bandha.”"}, {"f": "manual", "p": 45, "q": "Uddiyana bandha (the belly lock) is located about 2 inches below the belly button."}, {"f": "manual", "p": 45, "q": "Jalandhara bandha (the chin lock) is per- formed by extending the chin forward and drawing it back toward the throat where the clavicle bones meet."}], "fix": null, "note": "Draft matches p.45 (mula = firm lifting of pelvic floor at the perineum; p.47 glossary also lists Jalandhara throat lock, Mula root lock, Uddiyana upward-flying lock)."}}, {"topic": "ashtanga", "type": "recall", "q": "What is tristana?", "a": "The Tristana method is the union of three elements of Ashtanga (per Sri K. Pattabhi Jois): BREATH (ujjayi), DRISTHI (gaze), and POSTURE (asana). They are the three points of attention held at all times, purifying Spirit (breath), Mind (dristhi) and Body (posture), and are always performed together. (MRY Manual p.44)", "w": false, "mytype": false, "flag": false, "id": "007", "ord": 2, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 44, "q": "The Tristana method describes the union of three con - stituent elements of Ashtanga yoga, as detailed by its founder, the late Sri K. Pattabhi Jois: Breath, Dristhi, and Posture."}], "fix": null, "note": "Page 44 confirmed; p.44 also says they purify Spirit (breath), Mind (dristhi) and Body (posture)."}}, {"topic": "ashtanga", "type": "recall", "q": "What are the 8 limbs of Ashtanga Yoga? List in Sanskrit and define in English.", "a": "Ashta=eight, anga=limb (Patanjali's eightfold path): 1) YAMA – social ethics/restraints; 2) NIYAMA – personal ethics/observances; 3) ASANA – posture, seat; 4) PRANAYAMA – breath/prana control; 5) PRATYAHARA – withdrawal of the senses; 6) DHARANA – focus/concentration; 7) DHYANA – meditation (uninterrupted focus); 8) SAMADHI – complete absorption/bliss. (MRY Manual, The Eight Limbs, p.71–74)", "w": false, "mytype": false, "flag": false, "id": "009", "ord": 3, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 47, "q": "Yama: Social ethics; restraints Niyama: Personal ethics; internal restraints Asana: Posture, seat Pranayama: Prana control/breath work"}, {"f": "manual", "p": 74, "q": "Patanjali describes this eighth and ﬁnal stage of ashtanga, samadhi, as a state of ecstasy."}], "fix": null, "note": "Definitions match p.47 glossary and p.73-74 article; draft cites p.71-74 (actual article is PDF pp.73-74; p.72 is a divider)."}}, {"topic": "ashtanga", "type": "recall", "q": "Define namaste.", "a": "[Not given as a one-line definition in the manual — the manual discusses Namaste culturally and as bringing the palms together to reflect on one's motivation before practice.] Commonly taught: a respectful greeting with palms together (Anjali) — “the light/divine in me honors the light/divine in you.” (CONFIRM with class notes.)", "w": false, "mytype": false, "flag": true, "id": "011", "ord": 4, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 87, "q": "They are now ready to bring their hands into Namaste po-"}, {"f": "manual", "p": 88, "q": "sition and reﬂect on their motivation before beginning their practice."}, {"f": "manual", "p": 39, "q": "Namah/ namas: I Salute/ I bow"}], "fix": "No one-line definition exists in the materials. Closest: Namaste = hands brought together (prayer position) to reflect on one's motivation before practice (p.87-88); the root 'namah/namas' is glossed 'I Salute / I bow' (p.39, Surya Namaskara). The 'light in me honors the light in you' wording is NOT in the materials. Weekend 2 study Q4 (p.100) asks 'Define Namaste' without an answer.", "note": "Searched manual/history/pranayama/guru/mrityunjaya for namaste/namah/namas; the draft's NOT-given-as-definition flag is correct."}}, {"topic": "ashtanga", "type": "recall", "q": "Define moksha.", "a": "[Not found in the provided manual text.] Standard meaning: liberation — spiritual release/freedom from the cycle of birth and death (samsara). (CONFIRM with class notes.)", "w": false, "mytype": false, "flag": true, "id": "013", "ord": 5, "check": {"v": "SUPPORTED", "ev": [{"f": "pranayama", "p": 34, "q": "The goal of Indian religions is to escape this process, the achievement of which is calledmoksha."}, {"f": "pranayama", "p": 35, "q": "The liberation fromSaṃsārais calledMoksha,Nirvana, Mukti or Kaivalya."}, {"f": "history", "p": 11, "q": "introspection, and the concept of liberation (moksha)."}], "fix": "Moksha = liberation from samsara (the endless cycle of birth, death, rebirth); also called Nirvana, Mukti, Kaivalya (pranayama deck p.34-35). The draft's 'not found' is wrong, but its standard meaning matches.", "note": "Found in pranayama.txt (Hawah Kasat slides) and history.txt; not in the manual itself."}}, {"topic": "ashtanga", "type": "recall", "q": "List and explain the yamas and niyamas in Sanskrit and English. Briefly describe, as a whole, their relevance in yoga practice, both on and off the mat.", "a": "YAMAS (restraints / social ethics): Ahimsa – nonviolence; Satya – truthfulness; Asteya – nonstealing; Brahmacharya – continence/moderation; Aparigraha – noncovetousness. NIYAMAS (observances / personal ethics): Saucha – cleanliness; Samtosa – contentment; Tapas – heat/discipline; Svadhyaya – study of sacred scripture and of oneself; Isvara pranidhana – surrender to God. RELEVANCE: as the first two limbs they are guidelines for a meaningful, purposeful life — moral/ethical conduct and self-discipline. They apply both ON the mat (how we practice) and OFF the mat (how we live and treat others — the “Golden Rule”), forming the ethical foundation of the whole practice. (MRY Manual p.72–73)", "w": false, "mytype": false, "flag": false, "id": "015", "ord": 6, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 73, "q": "Ahimsa: nonviolence Satya: truthfulness Asteya: nonstealing Brahmacharya: continence Aparigraha: noncovetousness"}, {"f": "manual", "p": 73, "q": "Isvara pranidhana: surrender to God"}, {"f": "manual", "p": 73, "q": "Yamas are universal prac- tices that relate best to what we know as the Golden Rule"}], "fix": null, "note": "All ten terms and glosses match p.73; draft cites p.72-73 (PDF p.73). Relevance on/off the mat is partly the teacher's own synthesis (p.73 'meaningful and purposeful life' / 'moral and ethical conduct and self-discipline'; teaching articles pp.96-98)."}}, {"topic": "ancient", "type": "recall", "q": "Define sutra. Who compiled, and how books make up, the Yoga Sutras?", "a": "SUTRA means “thread” — the sutras are brief phrases/aphorisms that work to define yoga. The Yoga Sutras were COMPILED BY PATANJALI and are divided into FOUR books (padas): consciousness, practice, powers, and liberation. (The eight limbs are mentioned in the second book.) (MRY Manual, Sacred Texts)", "w": false, "mytype": false, "flag": false, "id": "018", "ord": 0, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 78, "q": "Sutra means thread. The sutras are brief phrases that work to deﬁne yoga"}, {"f": "manual", "p": 78, "q": "The Sutra is divided into four books: consciousness, practice, powers, and liberation"}, {"f": "manual", "p": 78, "q": "Aphorisms on yoga compiled by Patanjali"}], "fix": null, "note": "Matches p.78 exactly; eight limbs in second book also on p.78."}}, {"topic": "ancient", "type": "recall", "q": "Define upanishad.", "a": "Upanishad = “to sit near/with the teacher.” The Upanishads are commentaries on the Vedas that explain in detail one's relationship to all things — the concept that the entire universe can be studied and found within oneself; they contain many references to yoga, yogic techniques and meditation. (MRY Manual, Sacred Texts)", "w": false, "mytype": false, "flag": false, "id": "020", "ord": 1, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 78, "q": "“To sit near/with the teacher”"}, {"f": "manual", "p": 78, "q": "Commentaries on the Vedas"}, {"f": "manual", "p": 78, "q": "Concept that the entire universe can be studied and found within oneself"}], "fix": null, "note": "Matches p.78."}}, {"topic": "ancient", "type": "recall", "q": "Define atma, para-atma, and explain the mudra that connects them.", "a": "The mudra the manual names here is GYAN MUDRA. Atma = the individual self/soul; Para-Atma = the supreme/universal Self (the manual refers to Atman as “the Self” in the pancha-kosha material). Gyan (jnana) mudra joins the tip of the index finger (the individual self, atma) to the thumb (the universal Self, para-atma), symbolizing their union. [Manual supplies the term “Gyan Mudra” and “Atman = Self”; the fuller atma/para-atma explanation is standard — confirm with class.]", "w": false, "mytype": false, "flag": true, "id": "022", "ord": 2, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 101, "q": "•Atma •Para-Atma •Gyan Mudra"}, {"f": "history", "p": 37, "q": "Our individual \"Self\" (Atman) is part of the \"Universal Whole\" (Brahman)."}, {"f": "history", "p": 43, "q": "elaborate on how the soul (Atman) can be united with the ultimate truth (Brahman or Paramatman) through contemplation and meditation"}], "fix": "Atma/Atman = the individual Self/soul; Para-atma = Paramatman = Brahman, the ultimate truth/universal whole (history deck pp.11, 37, 43). Mudra = Gyan Mudra (the manual's Weekend 2 study Q12, p.101, lists 'Atma / Para-Atma / Gyan Mudra'). The manual only labels Gyan Mudra in the p.76 drawing (alongside Vishnu and Anjali mudras); no text states it joins index finger (atma) to thumb (para-atma) - that symbolism is standard but not in the materials.", "note": "p.76 is an image page (viewed rendered); searched all text files for atma/atman/paramatma/gyan/jnana. Note 'Para-Atma' spelled 'Paramatman' in history deck p.43."}}, {"topic": "history", "type": "recall", "q": "Who are the 2 most well-known lineages of Krishnamacharya’s yoga and what schools of yoga are affiliated with them?", "a": "Sri K. PATTABHI JOIS → ASHTANGA (Vinyasa) Yoga; and B.K.S. IYENGAR → IYENGAR Yoga. (Both stem from Krishnamacharya. Others in his legacy: Indra Devi; T.K.V. Desikachar / Viniyoga.) (MRY Manual, Krishnamacharya's Legacy)", "w": false, "mytype": false, "flag": false, "id": "025", "ord": 0, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 80, "q": "Whether you practice the dynamic series of Pattabhi Jois, the reﬁned alignments of B.K.S. Iyengar, the classical pos- tures of Indra Devi, or the customized vinyasa of Viniyoga"}, {"f": "manual", "p": 82, "q": "Ashtanga Vinyasa Yoga. As Krishnamacharya's pupils"}], "fix": null, "note": "Pattabhi Jois -> Ashtanga (Vinyasa); B.K.S. Iyengar -> Iyengar Yoga. Manual p.80 actually names four (also Indra Devi, Viniyoga/Desikachar); p.80 'Iyengar, Ashtanga, or Viniyoga lineages'. Draft cites a section called 'Krishnamacharya's Legacy', which is the article title on p.79."}}, {"topic": "history", "type": "recall", "q": "Who is the renowned female student of Krishnamacharya?", "a": "INDRA DEVI. (MRY Manual, Krishnamacharya's Legacy / Modern History)", "w": false, "mytype": false, "flag": false, "id": "027", "ord": 1, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 83, "q": "The woman, who became known as Indra Devi (she was born Zhenia Labunskaia, in pre-Soviet Latvia)"}], "fix": null, "note": "Matches p.83; Weekend 2 study Q20 (p.103) asks for the 'most noted female student'."}}, {"topic": "breath", "type": "recall", "q": "Define the 4 parts of the breath.", "a": "Inhalation – PURAKA; retention/hold after the inhale – ANTARA KUMBHAKA; exhalation – RECHAKA; retention/hold after the exhale – BAHYA KUMBHAKA. [The pranayama reading defines pranayama as “the regulation of the inhalation and exhalation and the suspension of the breath, and the modulation of its length and pressure” (Patanjali). The four Sanskrit labels are the standard terminology for those parts — confirm exact labels with class.]", "w": false, "mytype": false, "flag": true, "id": "030", "ord": 0, "check": {"v": "NOT_FOUND", "ev": [{"f": "manual", "p": 104, "q": "24.What are the four parts of breath and deﬁne each one?"}], "fix": "The materials never name or define the four parts. Study question only (manual p.104 Q24, blank). Puraka/antara kumbhaka/rechaka/bahya kumbhaka are standard terminology but do not appear; the only related text is manual p.89 'breath retention (kumbak)' and pranayama deck p.6 (Patanjali: 'regulation of the inhalation and exhalation and the suspension of the breath').", "note": "Searched all files for puraka/pooraka/rechaka/recaka/kumbhaka/kumbak/antara/bahya/'four parts'. Draft's own caveat is correct."}}, {"topic": "breath", "type": "recall", "q": "What is pranayama?", "a": "Pranayama = prana (life force) + yama (restraint; with a long “a,” also “to free”) — the conscious regulation, restraining and setting-free of prana through breath control. Patanjali: the regulation of inhalation, exhalation and suspension of the breath and the modulation of its length and pressure. It is the 4th of the eight limbs and calms/harmonizes the mind in preparation for meditation. (Hawah – Pranayama)", "w": false, "mytype": false, "flag": false, "id": "032", "ord": 1, "check": {"v": "SUPPORTED", "ev": [{"f": "pranayama", "p": 6, "q": "Defined by Patanjali as the regulation of the inhalation and exhalation and the suspension of the breath as well as the modulation of the length and pressure."}, {"f": "pranayama", "p": 7, "q": "Pranayama = Prana/ Yama = Restraint of Prana."}, {"f": "pranayama", "p": 4, "q": "The 4thof the Eight Limbs"}], "fix": null, "note": "Matches pranayama deck pp.4-8; manual p.73 also gives 'breath control' / literal 'life force extension'."}}, {"topic": "breath", "type": "recall", "q": "Name 3 instructions (the 3 S’s) to prepare students for meditation.", "a": "[Not located in the provided manual/readings — please confirm from class notes. Commonly taught versions use three S's such as Seat (find a steady seat), Spine (lengthen/sit tall & still), Silence — but this was NOT verified in the materials, so do not rely on it.]", "w": false, "mytype": false, "flag": true, "id": "034", "ord": 2, "check": {"v": "NOT_FOUND", "ev": [{"f": "manual", "p": 104, "q": "30.What are three important verbal cues to use when teaching meditation?"}, {"f": "manual", "p": 157, "q": "Make the distinction between a Dharma talk and Meditation."}], "fix": "Not in the materials. The only trace is the blank study question (manual p.104 Q30). Do not use Seat/Spine/Silence as an answer from the course materials.", "note": "Searched every 'meditat' hit in the manual (pp.7-351), plus teaching/Setting the Stage pages 43, 50-56, 157, and the other four files; no list of three S words."}}, {"topic": "anatomy", "type": "mc", "q": "Which movement the hips stretches the hip flexors?", "opts": ["Flexion", "Extension"], "correct": 1, "a": "EXTENSION — hip flexors are stretched when the leg moves back from the pelvis (hip extension). (Anatomy reading)", "flag": false, "marked": true, "id": "037", "ord": 0, "check": {"v": "SUPPORTED", "ev": [{"f": "anatomy-reading", "p": 22, "q": "Hip flexors are stretched with then the leg moves back from the pelvis (hip extension)  [slide 'Hip Flexors', shows psoas, iliacus, sartorius + low lunge photo] (read from the slide image)"}, {"f": "anatomy-reading", "p": 21, "q": "Backbends slide: 'Abdominals and hip flexors must lengthen to enter deep backbends.' (read from the slide image)"}], "fix": null, "note": "Draft wording closely matches the slide; extension is the correct option."}, "draftCorrect": 1}, {"topic": "anatomy", "type": "recall", "q": "Define abduction. Give an example of a posture, cue and body part to support the definition.", "a": "ABDUCTION = moving out and away from the midline. Example — posture: Warrior II (Virabhadrasana II); cue: “reach the arms away from each other / open the legs wide”; body part: arms/legs moving away from midline. (Ellie Clarke – Anatomy; example illustrative.)", "w": false, "mytype": false, "flag": false, "id": "041", "ord": 1, "check": {"v": "PARTIAL", "ev": [{"f": "anatomy-reading", "p": 6, "q": "Abduction: 'Moving out and away' (illustration: arm raised out to the side) (read from the slide image)"}], "fix": "Reading definition is 'Moving out and away' (illustrated by lifting the arm out to the side). It does not say 'midline' and gives no posture/cue example; Warrior II example is the drafter's own.", "note": "Definition supported; posture/cue/body-part example not in the reading or searched manual terms (draft labels it illustrative)."}}, {"topic": "anatomy", "type": "recall", "q": "Define adduction. Give an example of a posture, cue and body part to support the definition.", "a": "ADDUCTION = moving in and toward the midline. Example — posture: Garudasana (Eagle); cue: “cross and hug the thighs/forearms in toward the midline”; body part: legs/arms drawing to midline. (Ellie Clarke – Anatomy; example illustrative.)", "w": false, "mytype": false, "flag": false, "id": "043", "ord": 2, "check": {"v": "PARTIAL", "ev": [{"f": "anatomy-reading", "p": 6, "q": "Adduction: 'Moving in and towards' (illustration: arm lowered toward the body) (read from the slide image)"}], "fix": "Reading definition is 'Moving in and towards' (illustrated by lowering the arm to the body). 'Midline' wording and Garudasana example are not from the reading.", "note": "Definition supported; example is drafter's own (manual mentions Garudasana only for gaze/shoulder stretch, not adduction)."}}, {"topic": "anatomy", "type": "mc", "q": "Which of these connective tissues has nearly zero blood flow?", "opts": ["Muscle", "Tendon", "Ligament"], "correct": 2, "a": "LIGAMENT (ligaments/tendons have very poor blood supply; ligament is the standard answer). [Confirm — the reading lists the three tissues but doesn't state blood flow verbatim.]", "flag": true, "marked": true, "id": "045", "ord": 3, "check": {"v": "NOT_FOUND", "ev": [{"f": "anatomy-reading", "p": 8, "q": "Muscles and Connective Tissue slide: Tendons 'connect muscle to bone'; Ligaments 'connect bone to bone'. No blood-supply statement or table. (read from the slide image)"}], "fix": null, "note": "Reading has only definitions plus a joint diagram; manual groups ligaments/tendons together as drier tissue and says nothing about blood flow, so 'ligament' is an outside-knowledge answer."}, "draftCorrect": 2}, {"topic": "anatomy", "type": "mc", "q": "In seated forward folds, what action should you avoid before taking posture?", "opts": ["Moving the flesh from under the sitz-bones", "Anterior tilt of the pelvis", "Placing a block under the seat", "Engaging uddiyana bandha"], "correct": 3, "a": "Reasoned pick: ENGAGING UDDIYANA BANDHA (a strong belly lock hardens the abdomen and inhibits the forward fold; you should instead draw the flesh from under the sitz-bones, anteriorly tilt, and sit on a block). [Uncertain — confirm the intended answer with class.]", "flag": true, "marked": false, "id": "050", "ord": 4, "check": {"v": "NOT_FOUND", "ev": [], "fix": null, "note": "No 'sitz-bones', 'sit bone' or 'flesh' text anywhere in manual or reading; nothing says to avoid any of the four options, so the draft's uddiyana pick is unsupported (materials, if anything, favor tilt and props as good actions)."}, "draftCorrect": 3}, {"topic": "anatomy", "type": "mc", "q": "Students who have had hip replacements should never do which asana?", "opts": ["Balasana", "Virabhadrasana A", "Garudasana", "Vrksasana"], "correct": 2, "a": "GARUDASANA (Eagle) — deep hip adduction + internal rotation + flexion = highest dislocation risk after a hip replacement. [Standard contraindication — confirm.]", "flag": true, "marked": true, "id": "056", "ord": 5, "check": {"v": "NOT_FOUND", "ev": [], "fix": null, "note": "Neither source mentions hip replacements; Garudasana is plausible clinically but unsupported by the materials (Balasana/Vrksasana/Vira A also not addressed)."}, "draftCorrect": 2}, {"topic": "anatomy", "type": "recall", "q": "What is the best modification for eka pada rajakapotasana or agnistambhasana in order to protect the medial meniscus in the knee?", "a": "Keep the front shin's FOOT FLEXED (dorsiflexed) to stabilize and protect the knee, and do NOT force external rotation of the hip; support the hip with a block/blanket under the sitting bone so the knee isn't torqued. (Anatomy reading: when the foot is fixed while forcing hip external rotation, pressure lands on the inner knee / MCL / medial meniscus.)", "w": false, "mytype": false, "flag": false, "id": "062", "ord": 6, "check": {"v": "PARTIAL", "ev": [{"f": "anatomy-reading", "p": 10, "q": "'When the foot is held in place while forcing external rotation of the hip, the pressure expresses on the inner (medial collateral ligament) of the knee.' (read from the slide image)"}, {"f": "anatomy-reading", "p": 9, "q": "'The medial collateral ligament and medial meniscus are connected which make the inner knee the most fragile in yoga poses' (read from the slide image)"}, {"f": "anatomy-reading", "p": 12, "q": "Tightness in hips slide: seated cross-legged with 'prop top ankle on a block (in front of bottom shin)' and 'rest top knee on block to help relax hip' (read from the slide image)"}, {"f": "manual", "p": 239, "q": "'Pigeon: Place a block, bolster, blanket or rolled up towel under hip'; 'Double Pigeon: Block between knee & ankle'"}], "fix": "Materials support: do not force hip external rotation with the foot fixed; prop with blocks (block under top ankle/knee in double pigeon/fire log, block/blanket under hip in pigeon). 'Keep the foot flexed' is not stated in the reading.", "note": "Mechanism and block/prop modifications supported; the foot-flexed cue is not in either source."}}, {"topic": "anatomy", "type": "recall", "q": "What is the largest low back muscle?", "a": "QUADRATUS LUMBORUM (QL) — the “hip hikers,” connecting the spine to the pelvis. (Ellie Clarke – Anatomy; also MRY Manual)", "w": false, "mytype": false, "flag": false, "id": "064", "ord": 7, "check": {"v": "SUPPORTED", "ev": [{"f": "anatomy-reading", "p": 20, "q": "Slide 'Largest Low Back Muscle': 'Quadratus Lumborum \"Hip Hikers\"' (image of QL between ribs and pelvis) (read from the slide image)"}], "fix": null, "note": "Reading names QL (not erector spinae, which appears only as a label in the back-muscle diagram p19); manual p111 mentions QL activation but not 'largest'."}}, {"topic": "anatomy", "type": "recall", "q": "How many cervical vertebrae are there?", "a": "SEVEN (7). [Standard anatomy — shown in the reading's spine diagram.]", "w": false, "mytype": false, "flag": false, "id": "066", "ord": 8, "check": {"v": "SUPPORTED", "ev": [{"f": "anatomy-reading", "p": 19, "q": "The Spine diagram: 'Cervical vertebrae numbered from C1 to C7' (thoracic T1-T12, lumbar L1-L5, sacral) (read from the slide image)"}], "fix": null, "note": "C1 to C7 = 7."}}, {"topic": "anatomy", "type": "mc", "q": "Which part of the spine has the least range of movement? And why?", "opts": ["Cervical", "Thoracic", "Lumbar"], "correct": 1, "a": "THORACIC — because the ribs attach to the thoracic vertebrae, so the rib cage restricts movement, giving it the least range of motion. [Standard anatomy.]", "flag": false, "marked": true, "id": "068", "ord": 9, "check": {"v": "NOT_FOUND", "ev": [{"f": "anatomy-reading", "p": 19, "q": "Spine slide only labels cervical C1-C7, thoracic T1-T12, lumbar L1-L5; p7 shows spine flexion/extension/lateral flexion; no statement on which region moves least (read from the slide image)"}], "fix": null, "note": "Thoracic (ribs) is standard anatomy but is not stated in the course materials."}, "draftCorrect": 1}, {"topic": "anatomy", "type": "match", "q": "Match the directions:", "pairs": [["Anterior", "Front"], ["Posterior", "Back"], ["Inferior", "Below"], ["Medial", "Toward center"], ["Distal", "Further away"], ["Lateral", "Away from center"], ["Proximal", "Closer."]], "a": "Anterior = Front; Posterior = Back; Inferior = Below; Medial = Toward center; Distal = Further away; Lateral = Away from center; Proximal = Closer. (Also: Superior = Above.) (Ellie Clarke – Anatomy, directional-terms table)", "flag": false, "id": "073", "ord": 10, "check": {"v": "SUPPORTED", "ev": [{"f": "anatomy-reading", "p": 4, "q": "Directional Terms table: Anterior=Front; Posterior=Back; Superior=Above; Inferior=Below; Medial=Towards center; Lateral=Away from center; Distal=Further away; Proximal=Closer (read from the slide image)"}, {"f": "anatomy-reading", "p": 4, "q": "'Proximal is closer to the center or whatever the point of reference. Distal is further from the center...' (read from the slide image)"}], "fix": null, "note": "All seven draft pairings match the table; also p2-p3 show superior/inferior, anterior/posterior, medial/lateral slides."}}, {"topic": "energetic", "type": "recall", "q": "What is a nadi and what flows through the nadis?", "a": "A NADI is an energy channel/pathway in the subtle body; PRANA (life-force energy) flows through the nadis. (MRY Manual, energetic anatomy)", "w": false, "mytype": false, "flag": false, "id": "083", "ord": 0, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 167, "q": "In India, yogis called this energy prana and its pathways nadis"}, {"f": "manual", "p": 183, "q": "the energy channels or nadis"}], "fix": null, "note": "Draft matches (nadi = energy channel/pathway; prana flows through)."}}, {"topic": "energetic", "type": "recall", "q": "What is kundalini?", "a": "Kundalini is the dormant spiritual energy pictured as a sleeping serpent goddess coiled at the base of the first (root) chakra; when awakened she spirals up the energy channels (nadis), piercing each chakra and bringing successively higher states of awareness, culminating in enlightenment at the crown chakra. (MRY Manual)", "w": false, "mytype": false, "flag": false, "id": "085", "ord": 1, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 207, "q": "She coils around the base of the ﬁrst chakra and, when awakened, spirals up the en- ergy channels (nadis) and pierces each chakra"}], "fix": null, "note": "Draft is a near-verbatim paraphrase of p.207 (sleeping serpent goddess, culminating in enlightenment at the crown chakra)."}}, {"topic": "energetic", "type": "recall", "q": "Describe each of the 3 main nadis.", "a": "IDA – the left channel; the cool, lunar, feminine (shakti) current. PINGALA – the right channel; the hot, solar, masculine current. SUSHUMNA – the central channel along the spine, where the union of ida and pingala takes place (the awakening of higher consciousness). (MRY Manual – Hatha Yoga Pradipika)", "w": false, "mytype": false, "flag": false, "id": "087", "ord": 2, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 89, "q": "the shakti, or female, cool current which travels through the ida nadi, and the mind, or male, hot current which travels through the pin- gala nadi."}, {"f": "manual", "p": 89, "q": "When their union takes place in the central channel (sushumna nadi) it is the union of body and mind"}, {"f": "pranayama", "p": 23, "q": "Left Nostril •Ida Nadi –"}], "fix": null, "note": "Left/right assignment comes from pranayama deck pp.23-24 (Ida left nostril, cool, feminine; Pingala right, hot, sun, masculine); 'along the spine' is not stated in text but p.76 diagram shows all three on the spine."}}, {"topic": "sanskrit", "type": "recall", "q": "Translate yogas citta vrtti nirodhah into English.", "a": "“Yoga is the stilling (cessation/restraint) of the fluctuations/modifications of the mind.” Found in Patanjali's Yoga Sutras, Book 1 (Samadhi Pada), Sutra 1.2.", "w": false, "mytype": false, "flag": false, "id": "090", "ord": 0, "check": {"v": "SUPPORTED", "ev": [{"f": "history", "p": 67, "q": "Yogas Citta Vrtti Nirodhah (1:2) Yoga is the removing of the fluctuations of themind/ consciousness."}], "fix": null, "note": "Course slide gives Sutra 1:2 and 'removing of the fluctuations of the mind/consciousness' (p.68 also 'stilling of the mind'). Draft's 'Book 1 (Samadhi Pada)' is outside the materials but correct."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Warrior 1", "answer": "Virabhadrasana A (Vira I)", "flag": false, "id": "093", "ord": 1, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 338, "q": "Virabhadrasana A (Right Side - 5 Breaths) Warrior 1"}], "fix": null, "note": "Manual uses Virabhadrasana A (also p.345, p.364)."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Upward facing dog", "answer": "Urdhva Mukha Svanasana", "flag": false, "id": "094", "ord": 2, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 40, "q": "Urdhva Mukha Svanasana Upward Facing Dog"}], "fix": null, "note": "p.40 (also p.63 'Urdhva Mukha Svanasana (Upward-Facing Dog Pose)')."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Hand to foot", "answer": "Padangusthasana / Hasta Padangusthasana", "flag": false, "id": "095", "ord": 3, "check": {"v": "CONTRADICTED", "ev": [{"f": "manual", "p": 338, "q": "Padangusthasana (5 Breaths) Hand to Big Toe Pose Padahastasana (5 Breaths) Hand to Foot Pose"}, {"f": "manual", "p": 345, "q": "Padahastasana Foot to Hand Posture"}], "fix": "Padahastasana (the manual spells it Padahasthasana)", "note": "Confirmed on pp.338, 343, 345; draft's Padangusthasana / Hasta Padangusthasana is wrong for 'Hand to foot'."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Staff", "answer": "Dandasana", "flag": false, "id": "096", "ord": 4, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 345, "q": "Dandasana Staff Posture"}], "fix": null, "note": "p.345 Ashtanga Primary Series list."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Garland", "answer": "Malasana", "flag": false, "id": "097", "ord": 5, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 388, "q": "Garland Posture"}, {"f": "manual", "p": 339, "q": "Malasana (5 Breaths) Yogic Squat"}], "fix": null, "note": "Manual's posture page p.388 glosses Malasana as 'Garland Posture' (Signature Sequence p.339 calls it 'Yogic Squat')."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Wide-legged forward fold", "answer": "Prasarita Padottanasana", "flag": false, "id": "098", "ord": 6, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 392, "q": "Wide-Legged Forward Bend A"}, {"f": "manual", "p": 339, "q": "Prasarita Padottanasana A (5 Breaths) Wide Angle Forward Bend A"}], "fix": null, "note": "Manual spells it Prasarita Padottanasana (p.392); Wide-Legged Forward Bend on posture pages."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Revolved chair", "answer": "Parivrtta Utkatasana", "flag": false, "id": "099", "ord": 7, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 338, "q": "Parivrtta Utkatasana (Right Side - 5 Breaths) Revolved Chair"}], "fix": null, "note": "p.338-339."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Tree", "answer": "Vrksasana", "flag": false, "id": "100", "ord": 8, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 339, "q": "Vrksasana (Right and Left Side - 5 Breaths) Tree Pose"}], "fix": null, "note": "p.339."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Dancer", "answer": "Natarajasana", "flag": false, "id": "101", "ord": 9, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 339, "q": "Natarajasana (Right and Left Side - 5 Breaths) Dancer Pose"}], "fix": null, "note": "p.339."}}, {"topic": "sanskrit", "type": "pair", "sub": "posture", "label": "Translate into Sanskrit", "prompt": "Child’s", "answer": "Balasana", "flag": false, "id": "102", "ord": 10, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 340, "q": "Balasana (5 Breaths) Child’s Pose"}], "fix": null, "note": "p.340."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Side", "answer": "Parsva", "flag": false, "id": "104", "ord": 11, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 48, "q": "Parsva: Side"}], "fix": null, "note": "Sanskrit Fundamentals glossary p.48, 'Directives/Actions/Descriptors'."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Half", "answer": "Ardha", "flag": false, "id": "105", "ord": 12, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 48, "q": "Ardha: Half"}], "fix": null, "note": "Sanskrit Fundamentals glossary p.48, 'Directives/Actions/Descriptors'."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Downward", "answer": "Adho", "flag": false, "id": "106", "ord": 13, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 48, "q": "Adho: Downward"}], "fix": null, "note": "Sanskrit Fundamentals glossary p.48, 'Directives/Actions/Descriptors'."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Extended", "answer": "Utthita", "flag": false, "id": "107", "ord": 14, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 48, "q": "Utthita: Extended"}], "fix": null, "note": "Sanskrit Fundamentals glossary p.48, 'Directives/Actions/Descriptors'."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Supported", "answer": "Salamba", "flag": false, "id": "108", "ord": 15, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 48, "q": "Salamba: Supported"}], "fix": null, "note": "Sanskrit Fundamentals glossary p.48, 'Directives/Actions/Descriptors'."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Supine", "answer": "Supta", "flag": false, "id": "109", "ord": 16, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 48, "q": "Supta: Supine"}], "fix": null, "note": "Sanskrit Fundamentals glossary p.48, 'Directives/Actions/Descriptors'."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Reverse", "answer": "Viparita", "flag": false, "id": "110", "ord": 17, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 338, "q": "Viparita Virabhadrasana (Right Side - 5 Breaths) Reverse Warrior"}, {"f": "manual", "p": 48, "q": "Viparita: Inverted"}], "fix": "Viparita (the glossary glosses it 'Inverted'; manual uses it for 'Reverse' in Viparita Virabhadrasana = Reverse Warrior, p.338).", "note": "Draft's Viparita is right for 'Reverse' per the manual's own posture naming, but the glossary on p.48 says 'Inverted'."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Revolved", "answer": "Parivrtta", "flag": false, "id": "111", "ord": 18, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 48, "q": "Parivrtta: Revolved"}], "fix": null, "note": "Sanskrit Fundamentals glossary p.48, 'Directives/Actions/Descriptors' (glossary also has Parivartana: Revolving)."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Spread", "answer": "Prasarita", "flag": false, "id": "112", "ord": 19, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 48, "q": "Prasarita: Spread"}], "fix": null, "note": "Sanskrit Fundamentals glossary p.48, 'Directives/Actions/Descriptors'."}}, {"topic": "sanskrit", "type": "pair", "sub": "direction", "label": "Translate the direction word into Sanskrit", "prompt": "Bound", "answer": "Baddha", "flag": false, "id": "113", "ord": 20, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 48, "q": "Baddha: Bound"}], "fix": null, "note": "Sanskrit Fundamentals glossary p.48, 'Directives/Actions/Descriptors'."}}, {"topic": "teaching", "type": "recall", "q": "Name and describe the 3 personality types of yoga students. Indicate which one(s) you are.", "a": "The manual's three personality/constitution types are the DOSHAS: VATA (air/ether) – slim, light, quick, creative, restless, changeable; anxious/worried under stress. PITTA (fire/water) – medium/muscular, sharp intellect, focused and driven; irritable/angry under stress. KAPHA (earth/water) – larger, strong, steady, calm, grounded; slow to change, can be complacent/attached. (MRY Manual – Dosha section.) → Which one(s) you are: ________ (self-identify; most people are a blend).", "w": false, "mytype": true, "flag": false, "id": "115", "ord": 0, "check": {"v": "CONTRADICTED", "ev": [{"f": "manual", "p": 54, "q": "Consider the Athlete, the Scientist, and the Mystic:"}, {"f": "manual", "p": 54, "q": "Who Are You? The 3 Yogi Archeytpes"}], "fix": "The three types are the 3 Yogi Archetypes: ATHLETE (interested in working hard, sweating, performance; motivated by high energy, 'Go, go, go', positive affirmation, the 'how'), SCIENTIST (precision, evidence, logic; motivated by accuracy, numbers, literal language, the 'why'), MYSTIC (spiritual/metaphysical, less tangible rewards; motivated by colorful/metaphorical language, connection, energetic body). NOT the doshas.", "note": "p.54 table; doshas (Vata/Pitta/Kapha, pp.194, 214-216) are a separate topic (Weekend 3 study Q11-12). 'Which one(s) you are' is self-answer."}}, {"topic": "teaching", "type": "recall", "q": "List 3 cues to instruct students to use ujjayi pranayama.", "a": "(1) Breathe in and out through the NOSE (mouth closed). (2) Gently CONSTRICT/narrow the back of the throat (the glottis). (3) Create a soft, audible “OCEAN” sound — like fogging a mirror or a whisper — so the breath is “deep breathing with sound” (the Victorious Breath). (MRY Manual defines ujjayi as deep breathing with sound; cues are standard technique.)", "w": true, "mytype": false, "flag": false, "id": "117", "ord": 1, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 44, "q": "Ujjayi Pranayama or ”The Victorious Breath” can easily be deﬁned as deep breathing with sound"}, {"f": "manual", "p": 33, "q": "Breathe through your nose with lips sealed."}, {"f": "manual", "p": 90, "q": "Closing the mouth, inhale with control and concentration through ida and pingala, so that the breath is felt from the throat to the heart and produces a sonorous sound."}], "fix": "Materials support: breathe through the nose with lips sealed (p.33); deep breathing with sound (p.44); breath felt from the throat to the heart with a sonorous sound, mouth closed (HYP II:51, p.90); pranayama deck p.20-22 on nose breathing. Cues about constricting the glottis, 'ocean' sound or fogging a mirror are NOT in the materials.", "note": "Searched ujjayi/ocean/constrict/glottis/fog/mirror across all files; no explicit teaching cues for ujjayi."}}, {"topic": "teaching", "type": "recall", "q": "Provide 3 cues to encourage students to strengthen in virabhadrasana B.", "a": "(1) Bend the front knee deeper toward 90°, stacking knee over ankle. (2) Ground and isometrically drag the feet toward each other / press down through the outer edge of the back foot to fire the legs. (3) Reach actively out through both arms at shoulder height and stack the torso over the pelvis, lifting the lower belly. (Constructed per the manual's cueing method.)", "w": true, "mytype": false, "flag": false, "id": "119", "ord": 2, "check": {"v": "NOT_FOUND", "ev": [{"f": "manual", "p": 55, "q": "“[COMMAND/ACTION VERB] -- [BODY PART] -- [DIRECTION OR PLACE].”"}, {"f": "manual", "p": 36, "q": "Do not over cue. Three at maximum."}], "fix": "No Warrior 2/Virabhadrasana B cues are given (posture pages 366-367 are blank templates: ALIGNMENT / EFFECTIVE CUES / BENEFITS). Manual only gives cueing form: 'Start with a verb', command-body part-direction structure (p.55), max three cues (p.36). Draft cues are original, not course-derived.", "note": "Searched virabhadrasana/warrior pages in teaching sections; also p.147 and p.239 mention Warrior 2 only for foot patterns/transitions."}}, {"topic": "teaching", "type": "pair", "sub": "prop", "label": "Name a use of a prop", "prompt": "Utthita parsvakonasana", "answer": "Block on inside/outside of the front foot under the bottom hand (prevents collapsing in the front hip; more spinal extension).", "flag": false, "id": "122", "ord": 3, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 239, "q": "Extended Side Angle: Block on inside or outside of foot to help from collapsing in the front hip and ﬁnd more extension in the spine"}], "fix": null, "note": "Prop It Up! p.239 (Mimi Rieger); draft matches nearly verbatim."}}, {"topic": "teaching", "type": "pair", "sub": "prop", "label": "Name a use of a prop", "prompt": "Malasana", "answer": "Sit on a block (turned sideways) and/or a blanket or rolled mat under the heels.", "flag": false, "id": "123", "ord": 4, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 239, "q": "Yogic Squat: Seat of Block or blocks (always turn block side ways for comfort and stability) •Mat rolled under heels •Double folded blanket"}], "fix": null, "note": "p.239."}}, {"topic": "teaching", "type": "pair", "sub": "prop", "label": "Name a use of a prop", "prompt": "Paschimottanasana", "answer": "Blanket under the sitting bones + a strap around the feet.", "flag": false, "id": "124", "ord": 5, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 240, "q": "Seated/Standing Forward Fold: Strap Around the balls of feet"}, {"f": "manual", "p": 121, "q": "Use props- a blanket or two under the pelvis in forward folds"}], "fix": null, "note": "Strap p.240 and blanket under pelvis p.121 (beginners); both elements of the draft are supported."}}, {"topic": "teaching", "type": "pair", "sub": "prop", "label": "Name a use of a prop", "prompt": "Virabhadrasana B", "answer": "Back heel/edge of mat to the wall (or a chair under the front thigh) for stability & endurance.", "flag": false, "id": "125", "ord": 6, "check": {"v": "NOT_FOUND", "ev": [{"f": "manual", "p": 238, "q": "Common Props in the Yoga Class room: Blocks, Belts, Bolsters, Blankets, Chair, Wall, Sand bags, Rolled Yoga Mat, Rolled Up towel"}], "fix": "No Virabhadrasana B / Warrior 2 prop is listed in the Prop It Up! guide (pp.238-240) or elsewhere. Wall and chair are on the p.238 prop list generally, but the specific uses in the draft are not course-sourced.", "note": "Searched pp.100-335 for block/blanket/strap/bolster/wall/chair near warrior; Warrior 2 appears only in sequencing contexts."}}, {"topic": "teaching", "type": "pair", "sub": "prop", "label": "Name a use of a prop", "prompt": "Bakasana", "answer": "Folded blanket/cushion in front of the hands to ease fear of falling forward.", "flag": false, "id": "126", "ord": 7, "check": {"v": "NOT_FOUND", "ev": [{"f": "manual", "p": 238, "q": "Common Props in the Yoga Class room: Blocks, Belts, Bolsters, Blankets, Chair, Wall, Sand bags, Rolled Yoga Mat, Rolled Up towel"}], "fix": "No Bakasana prop is listed in the Prop It Up! guide (pp.238-240); manual only has arm-balance prop hints elsewhere none for crow. Draft's folded blanket/cushion in front of the hands is plausible but not course-sourced.", "note": "Searched all prop pages and bakasana/crow hits (pp.139-148, 339, 292)."}}, {"topic": "teaching", "type": "pair", "sub": "prop", "label": "Name a use of a prop", "prompt": "Salamba sarvanghasana", "answer": "2 blankets stacked under the shoulders (shoulder ridge), head on the floor.", "flag": false, "id": "127", "ord": 8, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 239, "q": "Shoulderstand: 2 Blankets under shoulder ridge, head resting on ﬂoor, shoulders propped up"}], "fix": null, "note": "p.239; draft matches."}}, {"topic": "teaching", "type": "pair", "sub": "prop", "label": "Name a use of a prop", "prompt": "Matsyasana", "answer": "Block under the upper back (and optionally one under the head) for a supported fish.", "flag": false, "id": "128", "ord": 9, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 240, "q": "Supported ﬁsh: (2 blocks/ bolster)"}], "fix": "Manual: Supported fish with 2 blocks or a bolster (p.240).", "note": "Draft's block under upper back and optional block under head is compatible but the manual specifies '2 blocks/bolster'. Block count check: draft uses blocks for 3 shapes (Parsvakonasana, Malasana, Matsyasana), within the 'up to 3' rule; the manual also lists blanket/rolled mat alternatives for Malasana."}}, {"topic": "teaching", "type": "recall", "q": "When cueing a posture, what is the most effective way to begin ordering your directives?", "a": "Start from the FOUNDATION and build the posture from the GROUND UP — begin with the base/feet and work upward. (MRY Manual: “Build the posture from the ground up,” “Instructing from the Ground Up,” “Start with their foundation,” “Start at the base of the pose.”)", "w": false, "mytype": false, "flag": false, "id": "129", "ord": 10, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 33, "q": "Build the posture from the ground up. Grow from the base."}, {"f": "manual", "p": 87, "q": "we can teach from the ground up."}, {"f": "manual", "p": 120, "q": "Teach from the back to the front."}], "fix": null, "note": "Draft quotes ('Instructing from the Ground Up', 'Start with their foundation', 'Start at the base of the pose') - the first three are verbatim titles/headings on pp.33, 87, 120; 'Start at the base of the pose' is a paraphrase of p.87."}}, {"topic": "teaching", "type": "recall", "q": "Following the question above, in order, provide 5 succinct alignment and/or energetic cues for virabhadrasana A.", "a": "Virabhadrasana A, ground-up order: (1) FOUNDATION – front foot forward, back foot in ~45°, heel-to-arch; ground the four corners of the front foot and the outer edge of the back foot. (2) LEGS – bend the front knee over the ankle toward 90°; straighten and engage the back leg. (3) PELVIS – square the hips to the front; lengthen the tailbone down. (4) CORE/TORSO – draw the lower belly up, lengthen the side waist, lift the chest. (5) ARMS & GAZE – reach the arms overhead (urdhva hastasana), soften the shoulders; drishti forward/up to the thumbs.", "w": true, "mytype": false, "flag": false, "id": "131", "ord": 11, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 110, "q": "In postures like Virabadrasana I (Warrior 1), it is anatomically impossible to do this."}, {"f": "manual", "p": 121, "q": "A nice way to teach Vira A is to break down a high lunge and then introduce the action of the back foot turning forwards."}, {"f": "manual", "p": 120, "q": "Teach from the back to the front."}], "fix": "Ground-up ordering is supported (pp.33, 87, 120) but no Vira A cue list exists (posture pages 364-365 are blank templates). Caution: draft cue 3 'square the hips to the front' conflicts with p.110, which says squaring the hips in Warrior 1 is anatomically impossible (the 'Hips' cue entry says squaring is wanted in pyramid, not Warrior 1). Use e.g. back foot turned forward from high lunge (p.121), urdhva hastasana with belly drawn in, back ribs lifted, neutral pelvis (p.121).", "note": "Draft cues are self-constructed; flagged one that the manual specifically cautions against."}}, {"topic": "beginners", "type": "recall", "q": "What are any 2 important aspects of teaching beginners?", "a": "(1) START WITH THEIR FOUNDATION — build a relationship with the feet (e.g., Tadasana: ground the four corners, spread the toes) and awareness of the hands; elongate the spine (“root down to rise up”). (2) USE CLEAR, SIMPLE LANGUAGE AND REPEAT instructions/poses — repetition builds confidence (and only slowly sprinkle in Sanskrit). (MRY Manual – Yoga for Beginners)", "w": true, "mytype": false, "flag": false, "id": "134", "ord": 0, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 120, "q": "Start With Their Foundation:"}, {"f": "manual", "p": 120, "q": "Use clear and simple language."}, {"f": "manual", "p": 121, "q": "Repeat instructions and poses. Repetition builds conﬁdence."}], "fix": null, "note": "Matches pp.120-121; other valid items: teach from back to front, slowly sprinkle in Sanskrit, don't get caught up in tricks."}}, {"topic": "beginners", "type": "recall", "q": "Name 2 modifications inside sun salutations when teaching beginners?", "a": "(1) STEP back / step forward (instead of jumping) between poses. (2) Use BLOCKS under the hands in Uttanasana (and introduce plank, knees-down chaturanga, and cobra instead of up-dog), synchronizing breath with movement. (MRY Manual – Yoga for Beginners)", "w": true, "mytype": false, "flag": false, "id": "136", "ord": 1, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 120, "q": "Surya Namaskara: teach step backs, step forwards, and uttanasana using blocks. Synchronize the breath with the movement. Introduce plank, chaturanga and cobra."}, {"f": "manual", "p": 110, "q": "It is better to have students modify with knees to the ﬂoor"}], "fix": null, "note": "Step back/step forward and Uttanasana with blocks are verbatim p.120; knees-down chaturanga supported by p.110 (Effective Cueing). 'Cobra instead of up-dog' is the draft's inference from 'introduce ... cobra'."}}, {"topic": "beginners", "type": "recall", "q": "What is an effective tool to use if beginner students don’t understand verbal cues?", "a": "DEMONSTRATE the pose — physically show/mirror it (use your body as the visual) rather than relying on words alone. (MRY Manual: “mirror or demonstrate different poses”; “verbalize… then demonstrate in silence.”)", "w": false, "mytype": false, "flag": false, "id": "138", "ord": 2, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 50, "q": "mirror or demonstrate diﬀerent poses."}, {"f": "manual", "p": 51, "q": "Demonstrations should be used sparingly."}, {"f": "manual", "p": 60, "q": "Try verbalizing instruction for these asanas, then demon- strating the poses in silence."}], "fix": "Demonstration is the manual's closest answer (pp.50-51, 60), but the manual does not explicitly pose this beginner question; p.51 cautions demonstrations 'should be used sparingly' (use when several students are not executing a pose correctly) and p.120 stresses clear, simple language. Physical assists/touch (p.51, with consent) are another tool.", "note": "Searched demonstrat/mirror/visual/assist in pp.36-66, 105-125; no explicit answer found."}}, {"topic": "sequencing", "type": "mc", "q": "Which one of these sequences does not change hip rotation?", "opts": ["Virabhadrasana A → Virabhadrasana B → Utthita trikonasana", "Alanasana → Virabhadrasana B → Utthita trikonasana", "Virabhadrasana B → Utthita parsvakonasana → Alanasana", "Virabhadrasana A → Virabhadrasana C → Alanasana"], "correct": 3, "a": "Virabhadrasana A → Virabhadrasana C → Alanasana — all keep the hips squared/facing forward (same orientation). [Reasoned from the manual's “hip rotation = keeping hips oriented the same.”]", "flag": false, "marked": true, "id": "141", "ord": 0, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 147, "q": "Hip Rotation: Keeping the hips oriented the same throughout an entire sequence (internal vs. external) is a way to ensure the practitioner can protect their pelvic, hip, and sacral region."}], "fix": null, "note": "Draft answer (Virabhadrasana A -> Virabhadrasana C -> Alanasana) is consistent with the definition: all three are squared-hip (hips neutral/internally-rotated back leg) shapes, whereas Vira B, trikonasana and parsvakonasana are open-hip/externally-rotated shapes, so the other three options all switch rotation. The manual does not classify individual poses, so this relies on standard anatomy plus p.110 ('Warrior 1 ... square' discussion)."}, "draftCorrect": 3}, {"topic": "sequencing", "type": "mc", "q": "Which one of these sequences does not change foot pattern?", "opts": ["Warrior 1 → Warrior 2 → Wide legged forward fold", "High lunge → Warrior 2 → Triangle", "High lunge twist → High lunge → Warrior 3", "Warrior 2 → Wide legged forward fold → Warrior 2 other side"], "correct": 2, "a": "Warrior 1 → Warrior 2 → Wide-legged forward fold — the wide stance/foot placement is maintained (open hips/torso, then straighten to fold) rather than swivelling the back heel up/down or lifting a foot. [Reasoned from the manual's foot-pattern definition & its “Warrior II→Triangle: feet stay the same” example — confirm.]", "flag": true, "marked": true, "id": "147", "ord": 1, "check": {"v": "CONTRADICTED", "ev": [{"f": "manual", "p": 147, "q": "Foot Patterns: Does the practitioner need to change how their feet are connected to the ground?"}, {"f": "manual", "p": 147, "q": "Good example: war- rior II to triangle pose- feet stay the same. Bad example: crescent pose to warrior II- the back foot has to swivel down, compromising the SI joint."}], "fix": "High lunge twist -> High lunge -> Warrior 3 (the front foot and back-foot ball stay planted; no swivel). Warrior 1 -> Warrior 2 swivels the back foot (the manual's own bad example: crescent/lunge to Warrior II), High lunge -> Warrior 2 swivels likewise, and Warrior 2 -> Wide-legged forward fold -> Warrior 2 other side re-sets the feet. The draft's Warrior 1 -> Warrior 2 -> Wide-legged is therefore wrong.", "note": "By elimination using the p.147 definition and bad example; Warrior 3 lifts the back foot but does not change how the grounded feet connect. Manual gives no explicit answer key (moderate confidence)."}, "draftCorrect": 0}, {"topic": "sequencing", "type": "recall", "q": "List 5 postures that you would sequence in building up to ardha chandrasana:", "a": "Example build-up: 1) Tadasana (grounding & balance) 2) Utthita Trikonasana (triangle — lateral length + grounding) 3) Utthita Parsvakonasana (side angle — leg strength + opening) 4) Virabhadrasana II (warrior II — hip external rotation + strength) 5) Vrksasana / Utthita Hasta Padangusthasana (single-leg balance) → then Ardha Chandrasana. (Built per the manual's peak-pose prep method.)", "w": true, "mytype": false, "flag": false, "id": "153", "ord": 2, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 146, "q": "DECONSTRUCT THE PEAK POSE: Decide what actions the practitioner must be familiar with to make the pose happen."}, {"f": "manual", "p": 146, "q": "CONNECT THE DOTS: Link the poses that mimic your peak pose intelligently. Simple transitions between poses usually work best."}], "fix": "Method (choose peak, deconstruct, prep poses that mimic actions, connect with simple transitions, counter-poses) is supported on pp.146-147, but no Ardha Chandrasana build-up list is given; the draft list is plausible but self-constructed. Ardha Chandrasana appears on the Weekend 5 worksheets list (p.127) and posture page 404 (blank template).", "note": "Searched ardha chandrasana/half moon across manual; draft flagged its own construction."}}, {"topic": "sequencing", "type": "circle", "q": "Circle all the transitions below that we would (generally) consider to be too complicated to teach to beginners or in one-breath transition:", "opts": [{"t": "Warrior 1 → Humble warrior", "correct": false}, {"t": "Virabhadrasana A → Ardha chandrasana", "correct": true}, {"t": "High lunge → Extended side angle", "correct": false}, {"t": "Prasarita padottanasana C → Utthita trikonasana", "correct": true}, {"t": "Pyramid → Revolved triangle", "correct": true}, {"t": "Vrksasana → Natarajasana", "correct": true}, {"t": "Twisting high lunge → Revolved chair", "correct": true}, {"t": "Tadasana → Malasana", "correct": false}, {"t": "Warrior 3 → Standing split", "correct": true}, {"t": "Parivrtta trikonasana → Parivrtta ardha chandrasana", "correct": true}], "a": "CIRCLE (too complex for beginners/one-breath): Virabhadrasana A→Ardha Chandrasana; Prasarita Padottanasana C→Utthita Trikonasana; Pyramid→Revolved Triangle; Vrksasana→Natarajasana; Twisting High Lunge→Revolved Chair; Warrior 3→Standing Split; Parivrtta Trikonasana→Parivrtta Ardha Chandrasana. LEAVE (fine for beginners): Warrior 1→Humble Warrior; High Lunge→Extended Side Angle; Tadasana→Malasana. [Reasoned by complexity — confirm.]", "flag": true, "id": "160", "ord": 3, "check": {"v": "PARTIAL", "ev": [{"f": "manual", "p": 146, "q": "Simple transitions between poses usually work best."}, {"f": "manual", "p": 147, "q": "When in doubt, simple is always best!"}, {"f": "manual", "p": 147, "q": "Bad example: crescent pose to warrior II- the back foot has to swivel down, compromising the SI joint."}], "fix": "The manual gives only principles (changing foot pattern or hip rotation compromises the foundation; keep transitions simple; teach Vira B before Vira A, p.121; do not get caught up in tricks, p.120) and no list of which transitions to circle. The draft's circles are reasonable. One inconsistency to consider: High lunge -> Extended side angle is left uncircled, yet it needs the back foot to swivel down (hip rotation square -> open), the exact pattern the manual calls a 'bad example' (p.147). The Warrior 1 -> Humble Warrior and Tadasana -> Malasana leave-alone choices fit the principles.", "note": "Searched creative sequencing, one breath, transition, beginner, foot pattern, hip rotation; also p.149 (one-breath-per-movement flows use foundational postures)."}}, {"topic": "sequencing", "type": "recall", "q": "When working with a peak posture, why is it important to include postures that counter the peak? Please give an example.", "a": "When you focus on a peak, the body works in a similar way all class; COUNTER-POSES work the body in the OPPOSITE direction so students leave BALANCED. Example: if you've worked forward folds all class, include a (supported) backbend during closing. (MRY Manual – Peak Poses / Counter-Poses)", "w": false, "mytype": false, "flag": false, "id": "172", "ord": 4, "check": {"v": "SUPPORTED", "ev": [{"f": "manual", "p": 147, "q": "In order to make sure your students leave feeling balanced, after the peak pose you want to throw in some poses that work the body in the oppo- site way."}, {"f": "manual", "p": 147, "q": "If you’re been working forward folds all class, throw in a supported back- bend during closing."}], "fix": null, "note": "Matches p.147 almost verbatim (including the forward fold/supported backbend example)."}}]};
+/*EXAM_DATA_END*/
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const root=$("examApp");
+const XS_KEY="mry_exam_v1";
+let XS=Object.assign({status:{},verified:{},mine:{},examDate:"2026-11-09",planDone:{},mockBest:null,mytype:""},JSON.parse(localStorage.getItem(XS_KEY)||"{}"));
+const save=()=>localStorage.setItem(XS_KEY,JSON.stringify(XS));
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const TCOL={ashtanga:"#F77F00",ancient:"#7209B7",history:"#3A86FF",breath:"#2EC4B6",anatomy:"#E63946",energetic:"#C78A00",sanskrit:"#6433A0",teaching:"#2D7A5F",beginners:"#4CB944",sequencing:"#3D51A3"};
+const SRCNAME={manual:"MRY Manual","anatomy-reading":"Ellie Clarke reading",pranayama:"Hawah, Pranayama",history:"Hawah, History & Philosophy"};
+const STOPCAPS=new Set(["MRY","II","III"]);
+function div(cls,html){const d=document.createElement("div");if(cls)d.className=cls;if(html!==undefined)d.innerHTML=html;return d;}
+function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function fmt(s){
+  let t=esc(s);
+  t=t.replace(/\s*\((\d)\)\s+/g,(m,n)=>`<br><b>${n}.</b> `).replace(/(^|\s)(\d)\)\s+/g,(m,a,n)=>`<br><b>${n}.</b> `).replace(/^<br>/,"");
+  t=t.replace(/\b[A-Z][A-Z'’\-]{2,}(?:\s[A-Z][A-Z'’\-]{2,})*\b/g,m=>STOPCAPS.has(m)?m:`<b>${m}</b>`);
+  t=t.replace(/\[([^\]]+)\]/g,'<span class="bnote">[$1]</span>');
+  const m=t.match(/\(([^()]*(?:Manual|Clarke|Hawah|reading|Constructed|constructed)[^()]*)\)\.?\s*$/);
+  if(m)t=t.slice(0,m.index)+`<span class="cite">(${m[1]})</span>`;
+  return t.replace(/\n/g,"<br>");
+}
+const nrm=s=>s.toLowerCase().replace(/ritta/g,"rtta").replace(/hasth/g,"hast").replace(/[^a-z ]/g," ").replace(/\s+/g," ").trim();
+function deckFor(ans){const seg=nrm(String(ans).split(/[\(\/;]/)[0]);if(!seg)return null;return DECK.find(c=>nrm(c.sa)===seg)||DECK.find(c=>nrm(c.sa).startsWith(seg+" "))||null;}
+const EXTRA_EX={viparita:["Viparita Virabhadrasana (Reverse Warrior), Signature Sequence p.338"]};
+function examplesFor(word){
+  const w=nrm(word);const seen=new Set();const out=[];
+  for(const c of DECK){const toks=nrm(c.sa).split(" ");if(toks.some(t=>t.startsWith(w))){const key=toks.slice(0,2).join(" ");if(!seen.has(key)){seen.add(key);out.push(c.sa);}}if(out.length>=3)break;}
+  return out;
+}
+function needsVerify(it){const v=it.check&&it.check.v;if(v==="SUPPORTED")return false;if(v==="CONTRADICTED"||v==="NOT_FOUND")return true;return !!it.flag;}
+function isOpenVerify(it){return needsVerify(it)&&!XS.verified[it.id];}
+function setStatus(it,ok){XS.status[it.id]=ok?"got":"review";save();}
+function statusChip(it){const s=XS.status[it.id];return s==="got"?'<span class="xchip got">got it</span>':s==="review"?'<span class="xchip review">review</span>':"";}
+
+function chkHTML(it){
+  const c=it.check;if(!c)return "";
+  const ev=(c.ev||[]).map(e=>`<div class="ev"><b>${esc(SRCNAME[e.f]||e.f)} p.${e.p}</b>: “${esc(e.q)}”</div>`).join("");
+  const cls={SUPPORTED:"ok",PARTIAL:"warn",NOT_FOUND:"warn",CONTRADICTED:"bad"}[c.v]||"warn";
+  const lab={SUPPORTED:"Checked against your course materials: supported",PARTIAL:"Checked: partly supported by your course materials",NOT_FOUND:"Checked: not found in the manual or readings. Confirm with class notes",CONTRADICTED:"Checked: differs from your course materials"}[c.v];
+  const fix=(c.fix&&c.v!=="CONTRADICTED")?`<div class="fixline"><b>Fuller answer per course materials:</b> ${fmt(c.fix)}</div>`:"";
+  return `<div class="chk ${cls}"><div class="chkh">${lab}</div>${ev}${fix}${c.note?`<div class="cnote">${esc(c.note)}</div>`:""}</div>`;
+}
+function verifyHTML(it){
+  if(!needsVerify(it))return "";
+  const v=!!XS.verified[it.id];
+  return `<div class="vbox ${v?"done":""}"><label class="vchk"><input type="checkbox" data-vid="${it.id}" ${v?"checked":""}> I verified this against my class notes</label><textarea class="vta" data-cid="${it.id}" placeholder="Your corrected answer or the class-notes version (saved on this device)">${esc(XS.mine["c_"+it.id]||"")}</textarea></div>`;
+}
+function wireAns(el,it){
+  el.querySelectorAll("input[data-vid]").forEach(i=>{i.onchange=()=>{XS.verified[it.id]=i.checked;save();i.closest(".vbox").classList.toggle("done",i.checked);};});
+  el.querySelectorAll("textarea[data-cid]").forEach(t=>{t.oninput=()=>{XS.mine["c_"+it.id]=t.value;save();};});
+}
+function answerHTML(it,mainHTML,extra){
+  const c=it.check;const main=mainHTML!==undefined?mainHTML:fmt(it.a||"");
+  const mine=XS.mine["c_"+it.id];let h="";
+  if(mine)h+=`<div class="mynote"><b>Your note:</b> ${esc(mine)}</div>`;
+  if(c&&c.v==="CONTRADICTED"&&c.fix)h+=`<div class="afix"><b>Per course materials:</b> ${fmt(c.fix)}</div><details class="draft"><summary>Draft answer in your study guide (differs)</summary><div class="atxt">${main}</div></details>`;
+  else h+=`<div class="atxt">${main}</div>`;
+  h+=extra||"";
+  if(it.draftCorrect!=null&&it.draftCorrect!==it.correct&&it.opts)h+=`<div class="chk bad"><div class="chkh">Your study guide marked “${esc(it.opts[it.draftCorrect])}”. The course materials point to “${esc(it.opts[it.correct])}”.</div></div>`;
+  return h+chkHTML(it)+verifyHTML(it);
+}
+function grader(it,onResult){
+  const g=div("xgrade",'<button class="btn" data-g="0">Review again</button><button class="btn good" data-g="1">Got it</button>');
+  g.querySelectorAll("button").forEach(b=>{b.onclick=()=>{const ok=b.dataset.g==="1";setStatus(it,ok);g.querySelectorAll("button").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");onResult(ok);};});
+  return g;
+}
+function deckButtons(sas){return sas.map(sa=>`<button class="btn link" data-sa="${esc(sa)}">See ${esc(sa)} in Asanas ›</button>`).join("");}
+function wireDeck(el){el.querySelectorAll("button[data-sa]").forEach(b=>{b.onclick=()=>window.showPose(b.dataset.sa);});}
+
+/* ---- renderers ---- */
+function rRecall(it,body,onResult){
+  body.appendChild(div("xq",fmt(it.q)));
+  if(it.w){const ta=document.createElement("textarea");ta.className="xmine";ta.placeholder="Write your answer first, then reveal the model answer";ta.value=XS.mine[it.id]||"";ta.oninput=()=>{XS.mine[it.id]=ta.value;save();};body.appendChild(ta);}
+  const rev=document.createElement("button");rev.className="btn primary";rev.textContent="Show answer";body.appendChild(rev);
+  const ans=div("xans hide");body.appendChild(ans);
+  rev.onclick=()=>{rev.style.display="none";ans.classList.remove("hide");ans.innerHTML=answerHTML(it);
+    if(it.mytype){const w=div("mynote",`<b>Which are you?</b> <select id="mytype"><option value="">Choose</option><option>Athlete</option><option>Scientist</option><option>Mystic</option><option>A blend</option></select>`);ans.appendChild(w);const s=w.querySelector("select");s.value=XS.mytype||"";s.onchange=()=>{XS.mytype=s.value;save();};}
+    wireAns(ans,it);ans.appendChild(grader(it,onResult));};
+}
+function rMC(it,body,onResult){
+  body.appendChild(div("xq",fmt(it.q)));
+  const list=div("xopts");body.appendChild(list);const ans=div("xans hide");
+  it.opts.forEach((o,i)=>{const b=document.createElement("button");b.className="xopt";b.textContent=o;
+    b.onclick=()=>{if(list.dataset.done)return;list.dataset.done="1";const ok=i===it.correct;b.classList.add(ok?"right":"wrong");list.children[it.correct].classList.add("right");setStatus(it,ok);
+      ans.classList.remove("hide");ans.innerHTML=(ok?'<div class="res ok">Correct</div>':'<div class="res bad">Not quite</div>')+answerHTML(it);wireAns(ans,it);onResult(ok);};
+    list.appendChild(b);});
+  body.appendChild(ans);
+}
+function rPair(it,body,onResult){
+  body.appendChild(div("xlab",esc(it.label)));
+  body.appendChild(div("xprompt",esc(it.prompt)));
+  const rev=document.createElement("button");rev.className="btn primary";rev.textContent="Reveal";body.appendChild(rev);
+  const ans=div("xans hide");body.appendChild(ans);
+  rev.onclick=()=>{rev.style.display="none";ans.classList.remove("hide");
+    const c=it.check;const shown=(c&&c.v==="CONTRADICTED"&&c.fix)?c.fix:it.answer;
+    const big=it.sub==="prop"?`<div class="atxt">${fmt(shown)}</div>`:`<div class="xbig">${esc(shown)}</div>`;
+    let links=[];
+    if(it.sub==="posture"){const d=deckFor(shown)||deckFor(it.answer);if(d)links=[d.sa];}
+    if(it.sub==="direction"){links=examplesFor(it.answer);}
+    let extra="";
+    if(links.length)extra+=`<div>${deckButtons(links)}</div>`;
+    if(it.sub==="direction"&&!links.length&&EXTRA_EX[nrm(it.answer)])extra+=`<div class="atxt" style="margin-top:8px">Example: ${esc(EXTRA_EX[nrm(it.answer)][0])}</div>`;
+    ans.innerHTML=answerHTML(it,big,extra);
+    wireAns(ans,it);wireDeck(ans);ans.appendChild(grader(it,onResult));};
+}
+function rMatch(it,body,onResult){
+  body.appendChild(div("xq",fmt(it.q)));
+  const terms=it.pairs.map(p=>p[0]);const defs=shuf(it.pairs.map(p=>p[1]));
+  const grid=div("xmatch");body.appendChild(grid);
+  let sel=null,errors=0,matched=0;const L=[],R=[];
+  terms.forEach((t,i)=>{const b=document.createElement("button");b.textContent=t;b.onclick=()=>{if(b.classList.contains("ok"))return;L.forEach(x=>x.classList.remove("sel"));b.classList.add("sel");sel=i;};L.push(b);});
+  defs.forEach((d,j)=>{const b=document.createElement("button");b.textContent=d;b.onclick=()=>{if(sel===null||b.classList.contains("ok"))return;
+    if(it.pairs[sel][1]===d){L[sel].classList.remove("sel");L[sel].classList.add("ok");b.classList.add("ok");sel=null;matched++;
+      if(matched===terms.length){const ans=div("xans");ans.innerHTML=`<div class="res ${errors?"bad":"ok"}">${errors?errors+" wrong tries":"Perfect"}</div>`+answerHTML(it);body.appendChild(ans);wireAns(ans,it);setStatus(it,errors===0);onResult(errors===0);}}
+    else{errors++;b.classList.add("no");setTimeout(()=>b.classList.remove("no"),500);}};R.push(b);});
+  // interleave rows: term on the left, definition on the right
+  for(let i=0;i<terms.length;i++){grid.appendChild(L[i]);grid.appendChild(R[i]);}
+}
+function rCircle(it,body,onResult){
+  body.appendChild(div("xq",fmt(it.q)));
+  const list=div("xcirc");body.appendChild(list);const btns=[];
+  it.opts.forEach(o=>{const b=document.createElement("button");b.textContent=o.t;b.onclick=()=>{if(list.dataset.done)return;b.classList.toggle("on");};list.appendChild(b);btns.push(b);});
+  const chk=document.createElement("button");chk.className="btn primary";chk.textContent="Check my circles";body.appendChild(chk);
+  const ans=div("xans hide");body.appendChild(ans);
+  chk.onclick=()=>{if(list.dataset.done)return;list.dataset.done="1";chk.style.display="none";let ok=true;
+    btns.forEach((b,i)=>{const on=b.classList.contains("on"),should=it.opts[i].correct;b.classList.remove("on");if(on===should)b.classList.add("right");else{b.classList.add("wrong");ok=false;}if(should)b.textContent="◯ "+b.textContent;});
+    setStatus(it,ok);ans.classList.remove("hide");ans.innerHTML=`<div class="res ${ok?"ok":"bad"}">${ok?"All correct":"Some differ from the answer key (green = matches, red = differs; the circle marks the ones to circle)"}</div>`+answerHTML(it);wireAns(ans,it);onResult(ok);};
+}
+const RENDER={recall:rRecall,mc:rMC,pair:rPair,match:rMatch,circle:rCircle};
+function renderItem(it,onResult){
+  const topic=EXAM.topics.find(t=>t.id===it.topic)||{name:""};
+  const card=div("xcard");card.style.setProperty("--cat",TCOL[it.topic]||"var(--purple)");
+  card.appendChild(div("xhd",`<span class="tag" style="background:${TCOL[it.topic]||"#6433A0"}">${esc(topic.name)}</span>${statusChip(it)}${isOpenVerify(it)?'<span class="vtag">verify</span>':""}`));
+  const body=div("xbody");card.appendChild(body);RENDER[it.type](it,body,onResult);return card;
+}
+
+/* ---- runner ---- */
+let run=null;
+function startRun(items,title,opts){
+  opts=opts||{};
+  if(!items.length){root.innerHTML=`<div class="xbar"><button class="btn" id="xBack">← Back</button><div class="xtitle">${esc(title)}</div><div></div></div><div class="xcard"><div class="xq">Nothing here yet.</div></div>`;$("xBack").onclick=home;return;}
+  run={items:items.slice(),idx:0,title,mock:!!opts.mock,res:{}};runView();
+}
+function runView(){
+  const it=run.items[run.idx];const n=run.items.length;
+  root.innerHTML=`<div class="xbar"><button class="btn" id="xBack">← ${run.mock?"Quit":"Topics"}</button><div class="xtitle">${esc(run.title)}</div><div class="xcount">${run.idx+1} / ${n}</div></div><div class="progress"><span style="width:${run.idx/n*100}%"></span></div><div id="xHost"></div><div class="nav"><button class="btn" id="xPrev">‹ Prev</button><button class="btn" id="xNext">${run.idx===n-1?"Finish":"Next ›"}</button></div>`;
+  $("xBack").onclick=home;
+  $("xHost").appendChild(renderItem(it,ok=>{run.res[it.id]=ok;if(run.mock)$("xNext").disabled=false;}));
+  const prev=$("xPrev"),next=$("xNext");
+  prev.disabled=run.mock||run.idx===0;
+  if(run.mock&&run.res[it.id]===undefined)next.disabled=true;
+  prev.onclick=()=>{run.idx--;runView();window.scrollTo(0,0);};
+  next.onclick=()=>{if(run.idx<n-1){run.idx++;runView();window.scrollTo(0,0);}else if(run.mock)mockDone();else home();};
+}
+function mockDone(){
+  const n=run.items.length;const ok=run.items.filter(i=>run.res[i.id]).length;
+  XS.mockBest=Math.max(XS.mockBest||0,ok/n);save();
+  const missed=run.items.filter(i=>!run.res[i.id]);
+  root.innerHTML=`<div class="xbar"><button class="btn" id="xBack">← Home</button><div class="xtitle">Mock exam result</div><div></div></div><div class="xscore"><div class="big">${ok} / ${n}</div><div class="xsub">${Math.round(ok/n*100)}% · best so far ${Math.round(XS.mockBest*100)}%</div></div><div class="xmiss">${missed.length?`<div class="xlab">Missed (now in Weak spots)</div>`+missed.map(m=>`<div class="xhit" style="--cat:${TCOL[m.topic]}">${esc(shortQ(m))}</div>`).join(""):'<div class="xsub" style="text-align:center">No misses. Nice.</div>'}</div><div class="xactions">${missed.length?'<button class="btn primary" id="xRetry">Review the misses</button>':""}<button class="btn" id="xHome2">Back to Exam Prep</button></div>`;
+  $("xBack").onclick=home;$("xHome2").onclick=home;if(missed.length)$("xRetry").onclick=()=>startRun(missed,"Missed in mock");
+}
+function shortQ(it){const s=it.type==="pair"?(it.label+": "+it.prompt):it.q;return s.length>110?s.slice(0,107)+"...":s;}
+
+/* ---- home / topics ---- */
+function daysLeft(){const d=new Date(XS.examDate+"T00:00:00");const t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/864e5);}
+function topicStats(t){const its=EXAM.items.filter(i=>i.topic===t.id);return{tot:its.length,got:its.filter(i=>XS.status[i.id]==="got").length,rev:its.filter(i=>XS.status[i.id]==="review").length,ver:its.filter(isOpenVerify).length};}
+function weakItems(){return EXAM.items.filter(i=>XS.status[i.id]==="review");}
+function verifyItems(){return EXAM.items.filter(isOpenVerify);}
+function home(){
+  run=null;
+  if(!EXAM.items.length){root.innerHTML='<div class="xcard"><div class="xq">Exam content has not been loaded.</div></div>';return;}
+  const all=EXAM.items.length,got=EXAM.items.filter(i=>XS.status[i.id]==="got").length;
+  const dl=daysLeft();const cd=dl>0?`${dl} day${dl===1?"":"s"} to the exam`:dl===0?"Exam day":"The exam date has passed";
+  const weak=weakItems().length,ver=verifyItems().length;
+  root.innerHTML=`<div class="xhero"><div class="xh1">Midterm Exam Prep</div><div class="xsub">${cd}</div><div class="xdate">Exam date <input type="date" id="xdate" value="${esc(XS.examDate)}"></div></div>
+  <div class="progress"><span style="width:${got/all*100}%"></span></div><div class="plabel"><b>${got}</b> of ${all} cards marked got it</div>
+  <div class="xactions"><button class="btn primary" id="xCont">Continue</button><button class="btn" id="xWeak">Weak spots (${weak})</button><button class="btn" id="xVer">To verify (${ver})</button><button class="btn" id="xMock">Mock exam</button><button class="btn" id="xPlan">14-day plan</button></div>
+  <input class="xsearch" id="xsearch" placeholder="Search questions and answers"><div class="xsres" id="xsres"></div>
+  <div class="xtopics">${EXAM.topics.map((t,i)=>{const s=topicStats(t);return `<button class="xtile" data-t="${t.id}" style="--cat:${TCOL[t.id]}"><div class="xtn">${i+1}. ${esc(t.name)}</div><div class="xtm">${s.got}/${s.tot} got it${s.rev?` · ${s.rev} to review`:""}</div><div class="xbarm"><span style="width:${s.tot?s.got/s.tot*100:0}%"></span></div>${s.ver?`<span class="vtag">${s.ver} to verify</span>`:""}</button>`;}).join("")}</div>
+  <div class="xfoot">The answers were drafted from your course materials and then checked against them. Amber items are not confirmed by the manual or readings, so check them against your class notes.</div>`;
+  $("xdate").onchange=e=>{if(e.target.value){XS.examDate=e.target.value;save();home();}};
+  $("xCont").onclick=()=>startRun(EXAM.items.filter(i=>XS.status[i.id]!=="got"),"Continue");
+  $("xWeak").onclick=()=>startRun(weakItems(),"Weak spots");
+  $("xVer").onclick=()=>startRun(verifyItems(),"To verify with class notes");
+  $("xMock").onclick=()=>startRun(shuf(EXAM.items).slice(0,20),"Mock exam",{mock:true});
+  $("xPlan").onclick=planView;
+  root.querySelectorAll(".xtile").forEach(b=>{b.onclick=()=>{const t=EXAM.topics.find(x=>x.id===b.dataset.t);startRun(EXAM.items.filter(i=>i.topic===t.id),t.name);};});
+  const sb=$("xsearch"),sr=$("xsres");
+  sb.oninput=()=>{const q=sb.value.trim().toLowerCase();sr.innerHTML="";if(q.length<2)return;
+    const hits=EXAM.items.filter(i=>(i.q||"").toLowerCase().includes(q)||(i.a||"").toLowerCase().includes(q)||(i.prompt||"").toLowerCase().includes(q)||(i.answer||"").toLowerCase().includes(q)).slice(0,8);
+    sr.innerHTML=hits.length?"":'<div class="xsub">No matches</div>';
+    hits.forEach(h=>{const b=document.createElement("button");b.className="xhit";b.style.setProperty("--cat",TCOL[h.topic]);b.innerHTML=`<small>${esc((EXAM.topics.find(t=>t.id===h.topic)||{}).name||"")}</small>${esc(shortQ(h))}`;b.onclick=()=>startRun([h],"Search");sr.appendChild(b);});};
+}
+
+/* ---- 14-day plan ---- */
+const PLAN=[
+ {t:"Ashtanga Yoga",d:"Parampara, bandhas, tristana, the 8 limbs, namaste, moksha, yamas and niyamas.",pick:i=>i.topic==="ashtanga"},
+ {t:"Ancient Texts, Modern History, Breath & Meditation",d:"Sutra, upanishad, atma, the two lineages, the 4 parts of the breath.",pick:i=>["ancient","history","breath"].includes(i.topic)},
+ {t:"Energetic Anatomy and Sanskrit postures",d:"Nadis and kundalini, then translate the 10 postures.",pick:i=>i.topic==="energetic"||(i.topic==="sanskrit"&&(i.sub==="posture"||i.type==="recall"))},
+ {t:"Sanskrit direction words",d:"The 10 direction words. Look each one up in the Asanas tab.",pick:i=>i.topic==="sanskrit"&&i.sub==="direction"},
+ {t:"Anatomy, part 1",d:"Movements, definitions and the first half of the anatomy cards.",pick:i=>i.topic==="anatomy"&&i.ord<6},
+ {t:"Anatomy, part 2",d:"Spine, directions and the safety questions.",pick:i=>i.topic==="anatomy"&&i.ord>=6},
+ {t:"Review day",d:"Everything you marked Review again.",weak:true},
+ {t:"Teaching Methodology",d:"Personality types, ujjayi cues, Warrior B cues, props, ground-up cueing.",pick:i=>i.topic==="teaching"},
+ {t:"Beginners",d:"Teaching beginners, sun salutation modifications, demonstrating.",pick:i=>i.topic==="beginners"},
+ {t:"Creative Sequencing",d:"Hip rotation, foot pattern, building to Ardha Chandrasana, transitions, counter-poses.",pick:i=>i.topic==="sequencing"},
+ {t:"Verify day",d:"Go through every amber item with your class notes.",verify:true},
+ {t:"Mock exam",d:"20 random questions, then look at the misses.",mock:true},
+ {t:"Asana deck run",d:"Flip the Asanas tab in both directions, especially the poses on the exam.",asana:true},
+ {t:"Weak spots and a second mock",d:"Clean up what is left, then a final mock.",weak:true}
+];
+function planView(){
+  const dl=daysLeft();const today=15-dl;
+  const ex=new Date(XS.examDate+"T00:00:00");
+  root.innerHTML=`<div class="xbar"><button class="btn" id="xBack">← Back</button><div class="xtitle">14-day plan</div><div></div></div><div class="xsub" style="text-align:center;margin-bottom:12px">Day 14 is the day before your exam (${ex.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}). Tick a day when you finish it.</div><div class="xdays">${PLAN.map((p,i)=>{const n=i+1;const d=new Date(ex);d.setDate(d.getDate()-(15-n));const done=!!XS.planDone[n];return `<div class="xday ${n===today?"today":""} ${done?"done":""}"><input type="checkbox" data-d="${n}" ${done?"checked":""}><div class="dn">Day ${n}${n===today?'<span class="tdy">today</span>':""}</div><div class="dt"><b>${esc(p.t)}</b><small>${d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})} · ${esc(p.d)}</small></div><button class="btn" data-o="${i}">Open</button></div>`;}).join("")}</div>`;
+  $("xBack").onclick=home;
+  root.querySelectorAll("input[data-d]").forEach(c=>{c.onchange=()=>{XS.planDone[c.dataset.d]=c.checked;save();planView();};});
+  root.querySelectorAll("button[data-o]").forEach(b=>{b.onclick=()=>{const p=PLAN[+b.dataset.o];
+    if(p.mock)startRun(shuf(EXAM.items).slice(0,20),"Mock exam",{mock:true});
+    else if(p.verify)startRun(verifyItems(),"To verify with class notes");
+    else if(p.asana){window.setMode("asana");}
+    else if(p.weak)startRun(weakItems(),"Weak spots");
+    else startRun(EXAM.items.filter(p.pick),p.t);};});
+}
+
+/* ---- mode switch ---- */
+window.setMode=function(m){
+  window.MODE=m;$("asanaApp").style.display=m==="asana"?"":"none";$("examApp").style.display=m==="exam"?"":"none";
+  document.querySelectorAll("#modeSeg button").forEach(b=>b.classList.toggle("on",b.dataset.mode===m));
+  try{localStorage.setItem("mry_mode",m);}catch(e){}
+  if(m==="exam")home();
+  window.scrollTo(0,0);
+};
+document.querySelectorAll("#modeSeg button").forEach(b=>{b.onclick=()=>window.setMode(b.dataset.mode);});
+window.MODE="asana";
+(function(){
+  const h=location.hash||"";let saved=null;try{saved=localStorage.getItem("mry_mode");}catch(e){}
+  if(h.indexOf("#exam")===0||(!h&&saved==="exam")){
+    window.setMode("exam");
+    if(h==="#exam/plan")planView();
+    else if(h.indexOf("#exam/topic/")===0){const t=EXAM.topics.find(x=>x.id===h.slice(12));if(t)startRun(EXAM.items.filter(i=>i.topic===t.id),t.name);}
+  }
+})();
+window.__exam={XS:()=>XS,home,startRun,renderItem,PLAN,planView};
+})();
+
+</script>
+<!--EXAM_BLOCK_END-->
+</body>
+</html>
